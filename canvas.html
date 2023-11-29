@@ -145,6 +145,11 @@
                 redrawCanvas();
             }
             console.log(drawingHistoryHead)
+
+            // cursor
+            if (event.type === "mouseleave") {
+                canvas.style.cursor = "default";
+            }
         }
 
         function redrawCanvas() {
@@ -239,13 +244,19 @@
             selectedLineWidth = event.target.value;
             lineWidthLabel.innerHTML = selectedLineWidth;
             ctx.lineWidth = selectedLineWidth;
-            lineWidthRange.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='${selectedLineWidth}' width='${selectedLineWidth}'><circle cx='${selectedLineWidth / 2}' cy='${selectedLineWidth / 2}' r='${(selectedLineWidth / 2) - 2}' fill='none' stroke='black' stroke-width='4'/></svg>") ${selectedLineWidth / 2} ${selectedLineWidth / 2}, auto`;
+
+            const circleRadius = (selectedLineWidth / 2) + 3; // Adjust the value as needed
+            lineWidthRange.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='${circleRadius * 2}' width='${circleRadius * 2}'><circle cx='${circleRadius}' cy='${circleRadius}' r='${circleRadius - 2}' fill='none' stroke='black' stroke-width='2'/></svg>") ${circleRadius} ${circleRadius}, auto`;
         });
 
         canvas.addEventListener("mousedown", startDrawing);
         canvas.addEventListener("mousemove", continueDrawing);
         canvas.addEventListener("mouseup", stopDrawing);
         canvas.addEventListener("mouseleave", stopDrawing);
+        canvas.addEventListener("mouseenter", () => {
+            const circleRadius = (selectedLineWidth / 2) + 3; // Adjust the value as needed
+            canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='${circleRadius * 2}' width='${circleRadius * 2}'><circle cx='${circleRadius}' cy='${circleRadius}' r='${circleRadius - 2}' fill='none' stroke='black' stroke-width='2'/></svg>") ${circleRadius} ${circleRadius}, auto`;
+        });
         document.addEventListener('keydown', function(event) {
             
             // Check if the Ctrl key is pressed (Ctrl key has key code 17)
