@@ -58,11 +58,11 @@
         ctx.lineCap = 'round';
         var drawing = false;
         var drawingPath = [];
-        var drawingHistory = [];
+        // var drawingHistory = [];
         var currentIndex = -1;
 
         var originalStrokeStyle = 'black'; // Original stroke color
-        var originalLineWidth = 2; // Original line width
+        var originalLineWidth = 1; // Original line width
         var selectedColor = originalStrokeStyle; // Selected color
         var selectedLineWidth = originalLineWidth; // Selected line width
 
@@ -239,6 +239,7 @@
             selectedLineWidth = event.target.value;
             lineWidthLabel.innerHTML = selectedLineWidth;
             ctx.lineWidth = selectedLineWidth;
+            lineWidthRange.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='${selectedLineWidth}' width='${selectedLineWidth}'><circle cx='${selectedLineWidth / 2}' cy='${selectedLineWidth / 2}' r='${(selectedLineWidth / 2) - 2}' fill='none' stroke='black' stroke-width='4'/></svg>") ${selectedLineWidth / 2} ${selectedLineWidth / 2}, auto`;
         });
 
         canvas.addEventListener("mousedown", startDrawing);
