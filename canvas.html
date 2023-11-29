@@ -245,6 +245,22 @@
         canvas.addEventListener("mousemove", continueDrawing);
         canvas.addEventListener("mouseup", stopDrawing);
         canvas.addEventListener("mouseleave", stopDrawing);
+        document.addEventListener('keydown', function(event) {
+            
+            // Check if the Ctrl key is pressed (Ctrl key has key code 17)
+            if (event.ctrlKey) {
+                // Check for Ctrl+Z (undo)
+                if (event.key === 'z' || event.key === 'Z') {
+                    event.preventDefault(); // Prevent the browser's default Ctrl+Z behavior
+                    undo(); // Call the undo function
+                }
+                // Check for Ctrl+R (redo)
+                else if (event.key === 'r' || event.key === 'R') {
+                    event.preventDefault(); // Prevent the browser's default Ctrl+R behavior
+                    redo(); // Call the redo function
+                }
+            }
+        });
     </script>
 </body>
 </html>
