@@ -22,6 +22,7 @@
     <button onclick="redo()">Redo</button>
     <button onclick="clearCanvas()">Clear</button>
     <button onclick="clearHistory()">Clear History</button>
+    <button onclick="exportCanvas()">Export</button>
     <script>
 
 
@@ -235,6 +236,20 @@
             // console.log(drawingHistoryHead)
         }
 
+        function exportCanvas() {
+            // Create a temporary <a> element
+            const link = document.createElement('a');
+            
+            // Set the href attribute of the <a> element to the canvas image data
+            link.href = canvas.toDataURL('image/png'); // You can change the format ('image/png') if needed
+            
+            // Set the download attribute to specify the default file name
+            link.download = 'canvas_image.png'; // Change the file name as desired
+            
+            // Programmatically trigger a click event on the <a> element to initiate the download
+            link.click();
+        }
+
         colorPicker.addEventListener('change', event => {
             selectedColor = event.target.value;
             ctx.strokeStyle = selectedColor;
@@ -260,18 +275,18 @@
         document.addEventListener('keydown', function(event) {
             
             // Check if the Ctrl key is pressed (Ctrl key has key code 17)
-            if (event.ctrlKey) {
-                // Check for Ctrl+Z (undo)
-                if (event.key === 'z' || event.key === 'Z') {
-                    event.preventDefault(); // Prevent the browser's default Ctrl+Z behavior
-                    undo(); // Call the undo function
-                }
-                // Check for Ctrl+R (redo)
-                else if (event.key === 'r' || event.key === 'R') {
-                    event.preventDefault(); // Prevent the browser's default Ctrl+R behavior
-                    redo(); // Call the redo function
-                }
+        if (event.ctrlKey || event.metaKey) {
+            // Check for Ctrl+Z (undo) on Windows or Command+Z on Mac
+            if ((event.key === 'z' || event.key === 'Z') && !event.shiftKey) {
+                event.preventDefault(); // Prevent the browser's default Ctrl+Z or Command+Z behavior
+                undo(); // Call the undo function
             }
+            // Check for Ctrl+R (redo) on Windows or Command+R on Mac
+            else if ((event.key === 'r' || event.key === 'R') && !event.shiftKey) {
+                event.preventDefault(); // Prevent the browser's default Ctrl+R or Command+R behavior
+                redo(); // Call the redo function
+            }
+        }
         });
     </script>
 </body>
