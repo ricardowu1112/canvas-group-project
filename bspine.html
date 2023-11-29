@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+
+        .color-picker {
+            margin: 1rem 1rem 0 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div style="margin-bottom: 20px;">
+        <input type="color" class="js-color-picker color-picker">
+        <input type="range" class="js-line-range" min="1" max="72" value="1">
+        <label class="js-range-value">1</label>Px
+    </div>
+    <canvas id="myCanvas" width="1200" height="600"></canvas>
+    <button onclick="undo()">Undo</button>
+    <button onclick="redo()">Redo</button>
+
+    <script>
+        const colorPicker = document.querySelector('.js-color-picker');
+        const lineWidthRange = document.querySelector('.js-line-range');
+        const lineWidthLabel = document.querySelector('.js-range-value');
+
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+        ctx.lineCap = 'round';
+        var drawing = false;
+        var drawingPath = [];
+        var drawingHistory = [];
+        var currentIndex = -1;
+
+        var originalStrokeStyle = 'black'; // Original stroke color
+        var originalLineWidth = 2; // Original line width
+        var selectedColor = originalStrokeStyle; // Selected color
+        var selectedLineWidth = originalLineWidth; // Selected line width
+
+        // Initialize color and line width
+        ctx.strokeStyle = selectedColor;
+        ctx.lineWidth = selectedLineWidth;
+
+        function startDrawing(event) {
+            drawing = true;
+            drawingPath = [];
+            var x = event.clientX - canvas.getBoundingClientRect().left;
+            var y = event.clientY - canvas.getBoundingClientRect().top;
+            drawingPath.push({ x, y });
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function continueDrawing(event) {
+            if (drawing) {
+                var x = event.clientX - canvas.getBoundingClientRect().left;
+                var y = event.clientY - canvas.getBoundingClientRect().top;
+                drawingPath.push({ x, y });
+
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        }
+
+        function undo() {
+            if (currentIndex >= 0) {
+                currentIndex--;
+                redrawCanvas();
+            }
+        }
+
+        function redo() {
+            if (currentIndex < drawingHistory.length - 1) {
+                currentIndex++;
+                redrawCanvas();
+            }
+        }
+
+        function stopDrawing(event) {
+            if (drawing) {
+                drawing = false;
+                var smoothedPath = smoothPath(drawingPath);
+                // Clear paths after the current index
+                drawingHistory = drawingHistory.slice(0, currentIndex + 1);
+                drawingHistory.push({
+                    path: smoothedPath,
+                    color: selectedColor,
+                    lineWidth: selectedLineWidth
+                });
+                currentIndex = drawingHistory.length - 1;
+                redrawCanvas();
+            }
+        }
+
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i <= currentIndex; i++) {
+                var { path, color, lineWidth } = drawingHistory[i];
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+
+                for (var j = 1; j < path.length; j++) {
+                    ctx.lineTo(path[j].x, path[j].y);
+                }
+                ctx.stroke();
+            }
+            // Restore the current selected color and line width
+            ctx.strokeStyle = selectedColor;
+            ctx.lineWidth = selectedLineWidth;
+        }
+
+        function smoothPath(path) {
+            var smoothedPath = [];
+            if (path.length < 2) {
+                return path;
+            }
+
+            // Define the number of points to use for smoothing (more points for smoother curves)
+            var numPointsToUse = 5; // You can adjust this number as needed
+
+            // Add the starting point
+            smoothedPath.push({ x: path[0].x, y: path[0].y });
+
+            for (var i = 1; i < path.length - 1; i++) {
+                var controlPoints = [];
+
+                // Calculate control points using more than 3 consecutive points
+                for (var j = Math.max(0, i - numPointsToUse + 1); j <= i; j++) {
+                    controlPoints.push(path[j]);
+                }
+
+                // Calculate the average position of control points
+                var sumX = 0;
+                var sumY = 0;
+                for (var k = 0; k < controlPoints.length; k++) {
+                    sumX += controlPoints[k].x;
+                    sumY += controlPoints[k].y;
+                }
+                var avgX = sumX / controlPoints.length;
+                var avgY = sumY / controlPoints.length;
+
+                // Add the average point to the smoothed path
+                smoothedPath.push({ x: avgX, y: avgY });
+            }
+
+            // Add the ending point
+            smoothedPath.push({ x: path[path.length - 1].x, y: path[path.length - 1].y });
+
+            return smoothedPath;
+        }
+
+        colorPicker.addEventListener('change', event => {
+            selectedColor = event.target.value;
+            ctx.strokeStyle = selectedColor;
+        });
+
+        lineWidthRange.addEventListener('input', event => {
+            selectedLineWidth = event.target.value;
+            lineWidthLabel.innerHTML = selectedLineWidth;
+            ctx.lineWidth = selectedLineWidth;
+        });
+
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", continueDrawing);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mouseleave", stopDrawing);
+    </script>
+</body>
+</html>
