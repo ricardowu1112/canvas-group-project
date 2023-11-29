@@ -20,14 +20,41 @@
     <canvas id="myCanvas" width="1200" height="600"></canvas>
     <button onclick="undo()">Undo</button>
     <button onclick="redo()">Redo</button>
-
+    <button onclick="clearCanvas()">Clear</button>
+    <button onclick="clearHistory()">Clear History</button>
     <script>
+
+
         const colorPicker = document.querySelector('.js-color-picker');
         const lineWidthRange = document.querySelector('.js-line-range');
         const lineWidthLabel = document.querySelector('.js-range-value');
 
         var canvas = document.getElementById("myCanvas");
         var ctx = canvas.getContext("2d");
+
+        // Define a doubly linked list node structure with an unnamed array as data
+        class LinkedListNode {
+            constructor() {
+                this.data = []; // Store data in an unnamed array
+                this.prev = null; // Reference to the previous node
+                this.next = null; // Reference to the next node
+            }
+        }
+
+        // Initialize the doubly linked list node
+        let drawingHistoryHead = new LinkedListNode();
+        let currentNode = drawingHistoryHead;
+
+        function addToDrawingHistory(path, color, lineWidth) {
+            const newData = {
+                path: path, // Store the drawing path
+                color: color, // Store the drawing color
+                lineWidth: lineWidth // Store the line width
+            };
+            currentNode.data.push(newData); // Add the new data to the current node's array
+            redrawCanvas(); // Redraw the canvas with the updated data
+        }
+
         ctx.lineCap = 'round';
         var drawing = false;
         var drawingPath = [];
@@ -68,13 +95,32 @@
             if (currentIndex >= 0) {
                 currentIndex--;
                 redrawCanvas();
+
+                console.log('Undo last drawing')
+
+            } else if (currentNode.prev) {
+                currentNode = currentNode.prev;
+                currentIndex = currentNode.data.length - 1;
+                redrawCanvas();
+
+                console.log('Undo clear operation')
             }
-        }
+                
+            }
 
         function redo() {
-            if (currentIndex < drawingHistory.length - 1) {
+            if (currentIndex < currentNode.data.length - 1) {
                 currentIndex++;
                 redrawCanvas();
+
+                console.log('Redo last drawing')
+
+            } else if (currentNode.next) {
+                currentNode = currentNode.next;
+                currentIndex = -1;
+                redrawCanvas();
+
+                console.log('Redo clear operation')
             }
         }
 
@@ -83,21 +129,28 @@
                 drawing = false;
                 var smoothedPath = smoothPath(drawingPath);
                 // Clear paths after the current index
-                drawingHistory = drawingHistory.slice(0, currentIndex + 1);
-                drawingHistory.push({
+                currentNode.data = currentNode.data.slice(0, currentIndex + 1);
+                currentNode.data.push({
                     path: smoothedPath,
                     color: selectedColor,
                     lineWidth: selectedLineWidth
                 });
-                currentIndex = drawingHistory.length - 1;
+                currentIndex = currentNode.data.length - 1;
+
+                // Set the next node to null if it exists
+                if (currentNode.next) {
+                    currentNode.next = null;
+                }
+
                 redrawCanvas();
             }
+            console.log(drawingHistoryHead)
         }
 
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for (var i = 0; i <= currentIndex; i++) {
-                var { path, color, lineWidth } = drawingHistory[i];
+                var { path, color, lineWidth } = currentNode.data[i];
                 ctx.strokeStyle = color;
                 ctx.lineWidth = lineWidth;
                 ctx.beginPath();
@@ -151,6 +204,30 @@
             smoothedPath.push({ x: path[path.length - 1].x, y: path[path.length - 1].y });
 
             return smoothedPath;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Create a new empty linked list node
+            const newNode = new LinkedListNode();
+            // Set the new node as the current node's next node
+            newNode.prev = currentNode;
+            currentNode.next = newNode;
+            // Set the new node as the current node
+            currentNode = newNode;
+            currentIndex = -1; // Reset the current index
+            console.log('Clear canvas')
+        }
+
+
+        function clearHistory() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Reset the head to an empty node
+            drawingHistoryHead = new LinkedListNode();
+            currentNode = drawingHistoryHead;
+            currentIndex = -1; // Reset the current index
+            // redrawCanvas(); // Redraw the canvas to reflect the cleared state
+            // console.log(drawingHistoryHead)
         }
 
         colorPicker.addEventListener('change', event => {
