@@ -142,6 +142,24 @@
             }
         });
 
+
+        // Function to remove the selected object
+        function removeSelectedObject() {
+            var activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                canvas.remove(activeObject);
+                saveToHistory();
+            }
+        }
+
+        // Binding the Backspace key to remove the selected object
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Backspace' || event.key === 'Delete') {
+                event.preventDefault(); // Prevent the default backspace action
+                removeSelectedObject();
+            }
+        });
+
 // Sample data points
 var dataPoints = [
     { x: 10, y: 50 }, 
