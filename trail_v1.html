@@ -23,6 +23,7 @@
     <button id="circ">Circ</button>
     <button id="save">Save</button>
     <button id="undo">undo</button>
+    <button id="redo">redo</button>
     <input type="text" id="text" />
     <br> 
     <canvas id="c" width="400" height="400"></canvas>
@@ -62,11 +63,11 @@ $("#circ").on("click", function() {
 
 var canvasHistory = [];
 var currentIndex = -1;
-var isUndoing = false;
+var isUndoRedoOperation = false;
 
 // Function to save the current canvas state to history
 function saveToHistory() {
-    if (!isUndoing) {
+    if (!isUndoRedoOperation) {
         currentIndex++;
         canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
         // Remove any future states if they exist
@@ -80,18 +81,31 @@ canvas.on('object:added', saveToHistory);
 
 document.getElementById("undo").addEventListener("click", function() {
     if (currentIndex > 0) {
-        isUndoing = true;
+        isUndoRedoOperation = true;
         currentIndex--;
         const previousState = canvasHistory[currentIndex];
         canvas.loadFromJSON(previousState, function() {
             canvas.renderAll();
-            isUndoing = false;
+            isUndoRedoOperation = false;
+        });
+    }
+});
+
+document.getElementById("redo").addEventListener("click", function() {
+    if (currentIndex < canvasHistory.length - 1) {
+        isUndoRedoOperation = true;
+        currentIndex++;
+        const nextState = canvasHistory[currentIndex];
+        canvas.loadFromJSON(nextState, function() {
+            canvas.renderAll();
+            isUndoRedoOperation = false;
         });
     }
 });
 
 // Save initial state
 saveToHistory();
+
 
     </script>
 </body>
