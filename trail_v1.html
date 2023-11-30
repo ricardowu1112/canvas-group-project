@@ -42,6 +42,12 @@
         //     return hash;
         // }
 
+        var canvasHistory = [];
+        var currentIndex = -1;
+        var isUndoRedoOperation = false;
+        var historySizeLimit = 20; // Set the maximum size of the history
+
+
         var canvas = new fabric.Canvas('c');
         canvas.setBackgroundImage('http://lorempixel.com/400/400/fashion', canvas.renderAll.bind(canvas));
 
@@ -64,10 +70,6 @@
             canvas.add(circle);
         });
 
-        var canvasHistory = [];
-        var currentIndex = -1;
-        var isUndoRedoOperation = false;
-        var historySizeLimit = 20; // Set the maximum size of the history
 
         // Function to save the current canvas state to history
         function saveToHistory() {
@@ -160,6 +162,11 @@
             }
         });
 
+
+        $("#save").on("click", function(e) {
+                    $(".save").html(canvas.toSVG());
+        });
+
 // Sample data points
 var dataPoints = [
     { x: 10, y: 50 }, 
@@ -182,10 +189,6 @@ function drawLine(point1, point2) {
 for (var i = 0; i < dataPoints.length - 1; i++) {
     drawLine(dataPoints[i], dataPoints[i + 1]);
 }
-
-        $("#save").on("click", function(e) {
-                    $(".save").html(canvas.toSVG());
-        });
     </script>
 </body>
 </html>
