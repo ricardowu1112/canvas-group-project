@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    #c {
+        background-color: grey;
+        margin-top: 10px;
+      }
+      
+      button {
+        padding: 10px 20px;
+      }
+      </style>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+      <script src="./js/fabric.js"></script>
+</head>
+<body>
+    <button id="rect">Rect</button>
+    <button id="circ">Circ</button>
+    <button id="save">Save</button>
+    <button id="undo">undo</button>
+    <input type="text" id="text" />
+    <br> 
+    <canvas id="c" width="400" height="400"></canvas>
+    <br>  
+    <p class="save">
+    </p>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    
+    <script>
+function calculateHash(obj) {
+    const hash = CryptoJS.MD5(obj).toString();
+    return hash;
+}
+
+var canvas = new fabric.Canvas('c');
+canvas.setBackgroundImage('http://lorempixel.com/400/400/fashion', canvas.renderAll.bind(canvas));
+
+$("#text").on("click", function() {
+    const text = new fabric.Text($("#text").val(), { left: 100, top: 100 });
+    canvas.add(text);
+});
+
+$("#rect").on("click", function() {
+    const rect = new fabric.Rect({
+        left: 40, top: 40, width: 50, height: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
+    });
+    canvas.add(rect);
+});
+
+$("#circ").on("click", function() {
+    const circle = new fabric.Circle({
+        left: 40, top: 40, radius: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
+    });
+    canvas.add(circle);
+});
+
+var canvasHistory = [];
+var currentIndex = -1;
+var isUndoing = false;
+
+// Function to save the current canvas state to history
+function saveToHistory() {
+    if (!isUndoing) {
+        currentIndex++;
+        canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
+        // Remove any future states if they exist
+        canvasHistory = canvasHistory.slice(0, currentIndex + 1);
+    }
+}
+
+// Fabric.js events to detect changes
+canvas.on('object:modified', saveToHistory);
+canvas.on('object:added', saveToHistory);
+
+document.getElementById("undo").addEventListener("click", function() {
+    if (currentIndex > 0) {
+        isUndoing = true;
+        currentIndex--;
+        const previousState = canvasHistory[currentIndex];
+        canvas.loadFromJSON(previousState, function() {
+            canvas.renderAll();
+            isUndoing = false;
+        });
+    }
+});
+
+// Save initial state
+saveToHistory();
+
+    </script>
+</body>
+</html>
