@@ -34,93 +34,93 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     
     <script>
-// function calculateHash(obj) {
-//     const hash = CryptoJS.MD5(obj).toString();
-//     return hash;
-// }
+        // function calculateHash(obj) {
+        //     const hash = CryptoJS.MD5(obj).toString();
+        //     return hash;
+        // }
 
-var canvas = new fabric.Canvas('c');
-canvas.setBackgroundImage('http://lorempixel.com/400/400/fashion', canvas.renderAll.bind(canvas));
+        var canvas = new fabric.Canvas('c');
+        canvas.setBackgroundImage('http://lorempixel.com/400/400/fashion', canvas.renderAll.bind(canvas));
 
-$("#text").on("click", function() {
-    const text = new fabric.Text($("#text").val(), { left: 100, top: 100 });
-    canvas.add(text);
-});
-
-$("#rect").on("click", function() {
-    const rect = new fabric.Rect({
-        left: 40, top: 40, width: 50, height: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
-    });
-    canvas.add(rect);
-});
-
-$("#circ").on("click", function() {
-    const circle = new fabric.Circle({
-        left: 40, top: 40, radius: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
-    });
-    canvas.add(circle);
-});
-
-var canvasHistory = [];
-var currentIndex = -1;
-var isUndoRedoOperation = false;
-
-// Function to save the current canvas state to history
-function saveToHistory() {
-    if (!isUndoRedoOperation) {
-        currentIndex++;
-        canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
-        // Remove any future states if they exist
-        canvasHistory = canvasHistory.slice(0, currentIndex + 1);
-    }
-}
-
-// Fabric.js events to detect changes
-canvas.on('object:modified', saveToHistory);
-canvas.on('object:added', saveToHistory);
-
-document.getElementById("undo").addEventListener("click", undo);
-function undo() {
-    if (currentIndex > 0) {
-        isUndoRedoOperation = true;
-        currentIndex--;
-        const previousState = canvasHistory[currentIndex];
-        canvas.loadFromJSON(previousState, function() {
-            canvas.renderAll();
-            isUndoRedoOperation = false;
+        $("#text").on("click", function() {
+            const text = new fabric.Text($("#text").val(), { left: 100, top: 100 });
+            canvas.add(text);
         });
-    }
-}
 
-document.getElementById("redo").addEventListener("click", redo);
-function redo() {
-    if (currentIndex < canvasHistory.length - 1) {
-        isUndoRedoOperation = true;
-        currentIndex++;
-        const nextState = canvasHistory[currentIndex];
-        canvas.loadFromJSON(nextState, function() {
-            canvas.renderAll();
-            isUndoRedoOperation = false;
+        $("#rect").on("click", function() {
+            const rect = new fabric.Rect({
+                left: 40, top: 40, width: 50, height: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
+            });
+            canvas.add(rect);
         });
-    }
-}
-// Save initial state
-saveToHistory();
 
-document.addEventListener('keydown', function(event) {
-            // Check if the Ctrl key is pressed (Ctrl key has key code 17)
-        if (event.ctrlKey || event.metaKey) {
-            // Check for Ctrl+Z (undo) on Windows or Command+Z on Mac
-            if ((event.key === 'z' || event.key === 'Z') && !event.shiftKey) {
-                event.preventDefault(); // Prevent the browser's default Ctrl+Z or Command+Z behavior
-                undo(); // Call the undo function
-            }
-            // Check for Ctrl+R (redo) on Windows or Command+R on Mac
-            else if ((event.key === 'r' || event.key === 'R') && !event.shiftKey) {
-                event.preventDefault(); // Prevent the browser's default Ctrl+R or Command+R behavior
-                redo(); // Call the redo function
+        $("#circ").on("click", function() {
+            const circle = new fabric.Circle({
+                left: 40, top: 40, radius: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
+            });
+            canvas.add(circle);
+        });
+
+        var canvasHistory = [];
+        var currentIndex = -1;
+        var isUndoRedoOperation = false;
+
+        // Function to save the current canvas state to history
+        function saveToHistory() {
+            if (!isUndoRedoOperation) {
+                currentIndex++;
+                canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
+                // Remove any future states if they exist
+                canvasHistory = canvasHistory.slice(0, currentIndex + 1);
             }
         }
+
+        // Fabric.js events to detect changes
+        canvas.on('object:modified', saveToHistory);
+        canvas.on('object:added', saveToHistory);
+
+        document.getElementById("undo").addEventListener("click", undo);
+        function undo() {
+            if (currentIndex > 0) {
+                isUndoRedoOperation = true;
+                currentIndex--;
+                const previousState = canvasHistory[currentIndex];
+                canvas.loadFromJSON(previousState, function() {
+                    canvas.renderAll();
+                    isUndoRedoOperation = false;
+                });
+            }
+        }
+
+        document.getElementById("redo").addEventListener("click", redo);
+        function redo() {
+            if (currentIndex < canvasHistory.length - 1) {
+                isUndoRedoOperation = true;
+                currentIndex++;
+                const nextState = canvasHistory[currentIndex];
+                canvas.loadFromJSON(nextState, function() {
+                    canvas.renderAll();
+                    isUndoRedoOperation = false;
+                });
+            }
+        }
+        // Save initial state
+        saveToHistory();
+
+        document.addEventListener('keydown', function(event) {
+            // Check if the Ctrl key is pressed (Ctrl key has key code 17)
+            if (event.ctrlKey || event.metaKey) {
+                // Check for Ctrl+Z (undo) on Windows or Command+Z on Mac
+                if ((event.key === 'z' || event.key === 'Z') && !event.shiftKey) {
+                    event.preventDefault(); // Prevent the browser's default Ctrl+Z or Command+Z behavior
+                    undo(); // Call the undo function
+                }
+                // Check for Ctrl+R (redo) on Windows or Command+R on Mac
+                else if ((event.key === 'r' || event.key === 'R') && !event.shiftKey) {
+                    event.preventDefault(); // Prevent the browser's default Ctrl+R or Command+R behavior
+                    redo(); // Call the redo function
+                }
+            }
         });
     </script>
 </body>
