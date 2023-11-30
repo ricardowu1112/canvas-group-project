@@ -19,18 +19,21 @@
       <script src="./js/fabric.js"></script>
 </head>
 <body>
-    <button id="rect">Rect</button>
-    <button id="circ">Circ</button>
-    <button id="save">Save</button>
-    <button id="undo">undo</button>
-    <button id="redo">redo</button>
-    <input type="text" id="text" />
-    <br> 
-    <canvas id="c" width="400" height="400"></canvas>
-    <br>  
-    <p class="save">
-    </p>
-    
+    <div style="display: flex; flex-direction: column;">
+        <div style="display: flex;justify-content: center;">
+            <button id="rect">Rect</button>
+            <button id="circ">Circ</button>
+            <button id="save">Save</button>
+            <button id="undo">undo</button>
+            <button id="redo">redo</button>
+            <p class="save"></p>
+            <input type="text" id="text" />
+        </div>
+        <div style="display: flex;justify-content: center;">
+            <canvas id="c" width="800" height="600"></canvas>
+        </div>
+    </div>
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <script>
         // function calculateHash(obj) {
@@ -153,6 +156,10 @@ function drawLine(point1, point2) {
 for (var i = 0; i < dataPoints.length - 1; i++) {
     drawLine(dataPoints[i], dataPoints[i + 1]);
 }
+
+        $("#save").on("click", function(e) {
+                    $(".save").html(canvas.toSVG());
+        });
     </script>
 </body>
 </html>
