@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    #c {
+        background-color: grey;
+        margin-top: 10px;
+      }
+      
+      button {
+        padding: 10px 20px;
+      }
+      </style>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+      <script src="./fabric.js"></script>
+</head>
+<body>
+    <button id="rect">Rect</button>
+    <button id="circ">Circ</button>
+    <button id="save">Save</button>
+    <button id="undo">undo</button>
+    <input type="text" id="text" />
+    <br> 
+    <canvas id="c" width="400" height="400"></canvas>
+    <br>  
+    <p class="save">
+    </p>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    
+    <script>
+        // Function to calculate the hash value for the objects array
+        function calculateHash(obj) {
+            // const jsonString = JSON.stringify(obj);
+            const hash = CryptoJS.MD5(obj).toString();
+            return hash;
+        }
+
+        var canvas = new fabric.Canvas('c');
+        // const initialObjectsHash = calculateObjectsHash(canvas._objects);
+
+
+        canvas.setBackgroundImage('http://lorempixel.com/400/400/fashion', canvas.renderAll.bind(canvas));
+        $("#text").on("click", function(e) {
+        text = new fabric.Text($("#text").val(), { left: 100, top: 100 });
+            canvas.add(text);
+        });
+        $("#rect").on("click", function(e) {
+            rect = new fabric.Rect({
+            left: 40,
+            top: 40,
+            width: 50,
+            height: 50,      
+            fill: 'transparent',
+            stroke: 'green',
+            strokeWidth: 5,
+                    });  
+        canvas.add(rect);
+        });
+
+        $("#circ").on("click", function(e) {
+            rect = new fabric.Circle({
+            left: 40,
+            top: 40,
+            radius: 50,     
+            fill: 'transparent',
+            stroke: 'green',
+            strokeWidth: 5,
+                    });  
+        canvas.add(rect);
+        });
+
+        var currentIndex = -1;
+        const canvasHistory = [];
+        saveToHistory()
+        let prev_hash = calculateHash(canvasHistory[currentIndex]);
+
+        // Function to save the current canvas state to history
+        function saveToHistory() {
+            const canvasState = canvas.toJSON();
+            canvasHistory.push(JSON.stringify(canvasState));
+            currentIndex++;
+        }
+
+        function checkHash() {
+            let canvasState = canvas.toJSON();
+            let current_hash = calculateHash(JSON.stringify(canvasState));
+            return current_hash === prev_hash;
+        }
+
+
+        document.getElementById("undo").addEventListener("click", function() {  
+            if (currentIndex > 0) {
+                currentIndex -= 1;
+                prev_hash = calculateHash(canvasHistory[currentIndex]);
+                // Retrieve the previous canvas state from history
+                const content = canvasHistory[currentIndex];
+
+                // Load the previous state onto the canvas
+                canvas.loadFromJSON(content, function () {
+                canvas.renderAll();
+                });
+            }
+        });
+
+        // 
+
+        // Add event listener to the window to track global mouseup events
+        window.addEventListener("click", checkMouseUp);
+        function checkMouseUp() {
+            // const temphash = calculateHash(canvas.toJSON());
+            let is_same = checkHash();
+            if (!is_same) {
+                saveToHistory();
+                prev_hash = calculateHash(canvasHistory[currentIndex]);
+            }
+            console.log(currentIndex);
+        }
+
+        $("#save").on("click", function(e) {
+            $(".save").html(canvas.toSVG());
+        });
+    </script>
+</body>
+</html>
