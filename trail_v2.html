@@ -127,7 +127,7 @@
                 <button id="undo">undo</button>
                 <button id="redo">redo</button>
                 <button id="clear">clear</button>
-                <button id="drawing-mode" drawing=true>Cancel drawing mode</button><br>
+                <button id="drawing-mode" drawing=false>Enter drawing mode</button><br>
                 <p class="save"></p>
                 <input type="text" id="text" />
             </div>
@@ -138,17 +138,10 @@
                     <option>Pencil</option>
                     <option>Circle</option>
                     <option>Spray</option>
-                    <option>Pattern</option>
-              
-                    <option>hline</option>
-                    <option>vline</option>
-                    <option>square</option>
-                    <option>diamond</option>
-                    <option>texture</option>
                   </select><br>
               
                   <label for="drawing-line-width">Line width:</label>
-                  <span class="info">30</span><input type="range" value="30" min="0" max="150" id="drawing-line-width"><br>
+                  <span class="info">5</span><input type="range" value="5" min="0" max="150" id="drawing-line-width"><br>
               
                   <label for="drawing-color">Line color:</label>
                   <input type="color" value="#005E7A" id="drawing-color"><br>
@@ -175,7 +168,7 @@
           <div class="vertical"></div>
           <button class="btn" id="copy" ><p> Copy </p></button>
           <div class="vertical"></div>
-          <button class="btn" id="paste"><p> Paste </p></button>
+          <button class="btn" id="paste"><p id="pasteText"> Paste </p></button>
         </div>
       </div>
       <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
@@ -247,7 +240,7 @@
         var canvas = new fabric.Canvas('c',{
             fireRightClick: true,
             stopContextMenu: true,
-            isDrawingMode: isDrawing
+            isDrawingMode: !isDrawing
         });
 
         fabric.Object.prototype.transparentCorners = false;
@@ -271,104 +264,16 @@
 // start check
 // start check
 // start check
-        if (fabric.PatternBrush) {
-            var vLinePatternBrush = new fabric.PatternBrush(canvas);
-            vLinePatternBrush.getPatternSrc = function() {
-
-            var patternCanvas = fabric.document.createElement('canvas');
-            patternCanvas.width = patternCanvas.height = 20;
-            var ctx = patternCanvas.getContext('2d');
-
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(0, 5);
-            ctx.lineTo(10, 5);
-            ctx.closePath();
-            ctx.stroke();
-
-            return patternCanvas;
-            };
-
-            var hLinePatternBrush = new fabric.PatternBrush(canvas);
-            hLinePatternBrush.getPatternSrc = function() {
-
-            var patternCanvas = fabric.document.createElement('canvas');
-            patternCanvas.width = patternCanvas.height = 10;
-            var ctx = patternCanvas.getContext('2d');
-
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(5, 0);
-            ctx.lineTo(5, 10);
-            ctx.closePath();
-            ctx.stroke();
-
-            return patternCanvas;
-            };
-
-            var squarePatternBrush = new fabric.PatternBrush(canvas);
-            squarePatternBrush.getPatternSrc = function() {
-
-            var squareWidth = 10, squareDistance = 2;
-
-            var patternCanvas = fabric.document.createElement('canvas');
-            patternCanvas.width = patternCanvas.height = squareWidth + squareDistance;
-            var ctx = patternCanvas.getContext('2d');
-
-            ctx.fillStyle = this.color;
-            ctx.fillRect(0, 0, squareWidth, squareWidth);
-
-            return patternCanvas;
-            };
-
-            var diamondPatternBrush = new fabric.PatternBrush(canvas);
-            diamondPatternBrush.getPatternSrc = function() {
-
-            var squareWidth = 10, squareDistance = 5;
-            var patternCanvas = fabric.document.createElement('canvas');
-            var rect = new fabric.Rect({
-                width: squareWidth,
-                height: squareWidth,
-                angle: 45,
-                fill: this.color
-            });
-
-            var canvasWidth = rect.getBoundingRect().width;
-
-            patternCanvas.width = patternCanvas.height = canvasWidth + squareDistance;
-            rect.set({ left: canvasWidth / 2, top: canvasWidth / 2 });
-
-            var ctx = patternCanvas.getContext('2d');
-            rect.render(ctx);
-
-            return patternCanvas;
-            };
-
-            // var img = new Image();
-            // img.src = '../assets/honey_im_subtle.png';
-
-            // var texturePatternBrush = new fabric.PatternBrush(canvas);
-            // texturePatternBrush.source = img;
-        }
 
         let drawingModeSelector = document.getElementById('drawing-mode-selector');
 
 drawingModeSelector.onchange = function() {
-    let isDrawingTool = ['hline', 'vline', 'square', 'diamond', 'texture', 'Pencil', 'Circle', 'Spray', 'Pattern'].includes(this.value);
+    let isDrawingTool = ['Pencil', 'Circle', 'Spray'].includes(this.value);
 
     if (isDrawingTool) {
         canvas.isDrawingMode = true;
 
         switch (this.value) {
-            case 'hline':
-                canvas.freeDrawingBrush = vLinePatternBrush;
-                break;
-            case 'vline':
-                canvas.freeDrawingBrush = hLinePatternBrush;
-                break;
-            // Add cases for other drawing tools...
             default:
                 canvas.freeDrawingBrush = new fabric[this.value + 'Brush'](canvas);
         }
@@ -389,10 +294,10 @@ drawingModeSelector.onchange = function() {
     }
 };
 
-        drawingColorEl.onchange = function() {
+        drawingColorEl.oninput = function() {
             canvas.freeDrawingBrush.color = this.value;
         };
-        drawingShadowColorEl.onchange = function() {
+        drawingShadowColorEl.oninput = function() {
             canvas.freeDrawingBrush.shadow.color = this.value;
         };
         drawingLineWidthEl.onchange = function() {
@@ -511,20 +416,29 @@ drawingModeSelector.onchange = function() {
             }
         });
 
+
+        let pastetext = document.querySelector("#pasteText");
+        pastetext.style.display = "none";
+
         $(document).on('click', '#copy', function () {
             // clone what are you copying since you
             // may want copy and paste on different moment.
             // and you do not want the changes happened
             // later to reflect on the copy.
             $('#context-menu').hide();
+            pastetext.style.display = "flex";
             canvas.getActiveObject().clone(function(cloned) {
                 _clipboard = cloned;
             });
+
         });
+
+
 
         $(document).on('click', '#paste', function Paste(e) {
             // clone again, so you can do multiple copies.
-            
+            $('#context-menu').hide();
+            console.log(_clipboard);
             $('#context-menu').hide();
             _clipboard.clone(function(clonedObj) {
                 canvas.discardActiveObject();
@@ -655,6 +569,8 @@ drawingModeSelector.onchange = function() {
 
             }
         }
+
+
 
 // Sample data points
 var dataPoints = [
