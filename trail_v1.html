@@ -17,6 +17,86 @@
       </style>
       <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
       <script src="./js/fabric.js"></script>
+      <style>
+        .context-menu
+        {
+        border-radius: 8px;
+        height: 20px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.54);
+        position: absolute;
+        background-color: white;
+        /*   backdrop-filter: blur(10px); */
+        /*   -webkit-backdrop-filter: blur(10px); */
+        
+        /* that's for the pen : */
+        display: none;
+        z-index: 10000 !important;
+        /*   transform: translate(-50%, -50%); */
+            
+        /* 
+        but normally it's just :
+        display: none;
+        */
+        }
+
+        .button-container{
+        display:flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        height:100%;
+        }
+        .btn
+        {
+        border: none;
+        background-color: transparent;
+        width: 100%;
+        font-size: 0.5em;
+        font-family: "Quicksand", sans-serif;
+        font-weight: 800;
+        letter-spacing: 0.004em;
+        color: #e8e8e8;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        justify-content:center;
+        align-items: center;
+        height: 100%;
+        }
+        .btn p
+        {
+        width: 100%;
+        height: 100%;
+        text-align: left;
+        transition: background-color 0.15s;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        padding: 0 0px;
+        color: black;
+        margin: 3px;
+        font-size: 6px;
+        }
+        .btn:hover div
+        {
+        background-color: rgba(147, 147, 147, 0.31);
+        }
+        #blue
+        {
+        padding : 0px 0;
+        }
+        #green
+        {
+        padding : 0px 0;
+        }
+        #orange {
+        padding : 0px 0;
+        }
+        .vertical {
+        border: 1px solid black;
+        height: 80%
+        }
+      </style>
 </head>
 <body>
     <div style="display: flex; flex-direction: column;">
@@ -35,7 +115,61 @@
         </div>
     </div>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <div class="context-menu">
+        <div class="button-container">
+          <button class="btn" id="blue" onClick="changeBackground(id)"><p>Blue</p></button>
+          <div class="vertical"></div>
+          <button class="btn" id="orange" onClick="changeBackground(id)"><p>Orange</p></button>
+          <div class="vertical"></div>
+          <button class="btn" id="green" onClick="changeBackground(id)"><p>Green</p></button>
+        </div>
+      </div>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+      <!-- <script>
+            
+            const orange = document.querySelector("#orange");
+            const blue = document.querySelector("#blue");
+            const green = document.querySelector("#green");
+
+
+            document.addEventListener('DOMContentLoaded', (event) => {
+                const menu = document.querySelector(".context-menu");
+                const canvaswall = document.querySelector("#c");
+                canvaswall.addEventListener("contextmenu", function(e) {
+                    // Show the context menu
+                menu.style.display = "block";
+                
+                // just for the pen :
+                menu.style.transform = "translate(0)";
+                
+                // set position X of the menu
+                if ((window.innerWidth - e.clientX) > menu.offsetWidth + 10){
+                    menu.style.left = e.clientX + "px";
+                }
+                else
+                {
+                    menu.style.left = (e.clientX - menu.offsetWidth) + "px";
+                }
+                // set position Y of the menu
+                if ((e.clientY) > menu.offsetHeight + 10){   
+                menu.style.top = (e.clientY - menu.offsetHeight) + "px";
+                }
+                else
+                {
+                    menu.style.top = e.clientY + "px";
+                }
+                })
+
+                //exit the context menu
+                window.addEventListener("click", function(){
+                    menu.style.display = "none";
+                })
+            });
+    
+            
+            
+      </script> -->
+ 
     <script>
         // function calculateHash(obj) {
         //     const hash = CryptoJS.MD5(obj).toString();
@@ -47,8 +181,17 @@
         var isUndoRedoOperation = false;
         var historySizeLimit = 20; // Set the maximum size of the history
 
+        var canvas = new fabric.Canvas('c',{
+            fireRightClick: true,
+            stopContextMenu: true});
+        
+        //     Disable default right-click context menu
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        });
 
-        var canvas = new fabric.Canvas('c');
         canvas.setBackgroundImage('http://lorempixel.com/400/400/fashion', canvas.renderAll.bind(canvas));
 
         $("#text").on("click", function() {
@@ -92,6 +235,43 @@
         // Fabric.js events to detect changes
         canvas.on('object:modified', saveToHistory);
         canvas.on('object:added', saveToHistory);
+        canvas.on('mouse:down', function(options) {
+    if (options.e.button === 2 || options.e.which === 3) { // Right-click
+        console.log("Right-click");
+        options.e.preventDefault();
+        const menu = document.querySelector(".context-menu");
+
+        // Show the context menu
+        menu.style.display = "block";
+
+        // Calculate position of the menu based on the mouse event and menu size
+        const menuWidth = menu.offsetWidth;
+        const menuHeight = menu.offsetHeight;
+        const clientX = options.e.clientX;
+        const clientY = options.e.clientY;
+
+        // Adjust position if the menu goes beyond the right edge of the window
+        if (clientX + menuWidth > window.innerWidth) {
+            menu.style.left = (window.innerWidth - menuWidth) + "px";
+        } else {
+            menu.style.left = clientX + "px";
+        }
+
+        // Adjust position if the menu goes beyond the bottom edge of the window
+        if (clientY + menuHeight > window.innerHeight) {
+            menu.style.top = (window.innerHeight - menuHeight) + "px";
+        } else {
+            menu.style.top = clientY + "px";
+        }
+
+        // Exit the context menu on window click
+        window.addEventListener("click", function() {
+            menu.style.display = "none";
+        });
+        return false;
+    }
+});
+
 
         document.getElementById("undo").addEventListener("click", undo);
         function undo() {
