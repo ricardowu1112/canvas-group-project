@@ -19,10 +19,16 @@
       <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script> -->
       <script src="./js/fabric.js"></script>
       <style>
-        .context-menu {
-            opacity: 0.7;
+#c {
+        background-color: white;
+      }
+      
+      button {
+        padding: 10px 20px;
+      }
+.context-menu {
+            /* opacity: 0.7; */
             background: #282828;
-            color: #E086D3;
             position: absolute;
             top:-140%;
             left: -25%;
@@ -33,7 +39,7 @@
             z-index: 10000 !important;
             display: none;
         }
-        /* tooltip  after*/
+        /* tooltip  after
         .context-menu::after {
             content: " ";
             width: 0;
@@ -44,7 +50,7 @@
             opacity: 1;
             position: absolute;
             left: 40%;
-        }
+        } */
 
 
         .button-container{
@@ -115,6 +121,74 @@
             /* R: Only for testing */
             /* height: 85vh; */
         }
+
+ .tooltip-carousel {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  padding: 0px 8px;
+  background: #d5d5d5;
+  border-radius: 18px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  height:11px;
+}
+
+.tooltip-carousel-content {
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease-in-out;
+  white-space: nowrap;
+}
+
+.tooltip-carousel-item {
+  padding: 3px 5px;
+  cursor: pointer;
+  margin: 0px 0px;
+  white-space: nowrap;
+  font-size: x-small;
+}
+
+.tooltip-carousel-item:hover {
+  background: #b1b0b0;
+  border-radius: 10px;
+}
+
+
+.carousel-divider {
+  height: 24.5px;
+  border: 1px solid #ccc;
+  margin: 0px 5px;
+}
+
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 5;
+}
+
+.prev {
+  left: 10px;
+}
+
+.next {
+  right: 10px;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  bottom: -9.5px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #d5d5d5;
+  transform: translateX(-50%);
+}
       </style>
 </head>
 <body>
@@ -163,13 +237,14 @@
     </div>
 
     <div class="context-menu" id="context-menu">
-        <div class="button-container">
-          <button class="btn" id="group"><p id="groupText"> Group </p></button>
-          <div class="vertical"></div>
-          <button class="btn" id="copy" ><p> Copy </p></button>
-          <div class="vertical"></div>
-          <button class="btn" id="paste"><p id="pasteText"> Paste </p></button>
-        </div>
+        <div style="position:absolute;"> <!-- Change position to relative here -->
+          <div class="tooltip-carousel"  style="height:auto">
+              <div class="tooltip-carousel-content" id="carouselContent" style="height: 100%;width: auto !important;">
+                  <!-- Dynamic content will be loaded here -->
+              </div>
+  
+          </div>
+          <div class="tooltip-arrow"></div> <!-- Tooltip 'nib' -->
       </div>
       <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
       
@@ -217,13 +292,177 @@
             
             
       </script> -->
- 
+ <script>
+function copyObjectHandler() {
+    $('#context-menu').hide();
+pastetext.style.display = "flex";
+canvas.getActiveObject().clone(function(cloned) {
+_clipboard = cloned;
+// console.log(_clipboard);
+})
+}
+
+function pasteObjectHandler(e) {
+        $('#context-menu').hide();
+            console.log(_clipboard);
+            _clipboard.clone(function(clonedObj) {
+                canvas.discardActiveObject();
+                var pointer = canvas.getPointer(e);  // Transform the mouse coordinates
+                clonedObj.set({
+                    left: pointer.x,
+                    top: pointer.y,
+                    evented: true,
+                });
+                if (clonedObj.type === 'activeSelection') {
+                    // active selection needs a reference to the canvas.
+                    clonedObj.canvas = canvas;
+                    clonedObj.forEachObject(function(obj) {
+                        canvas.add(obj);
+                    });
+                    // this should solve the unselectability
+                    clonedObj.setCoords();
+                } else {
+                    canvas.add(clonedObj);
+                }
+                _clipboard.top += 10;
+                _clipboard.left += 10;
+                canvas.setActiveObject(clonedObj);
+                canvas.requestRenderAll();
+            });
+}
+
+let _clipboard;
+document.addEventListener('keydown', function(event) {
+  if (event.ctrlKey || event.metaKey) { // Check for Ctrl key (Windows) or Command key (Mac)
+    if (event.key === 'c') {
+        copyObjectHandler();
+    } else if (event.key === 'v') {
+        if (_clipboard) {
+	// clone again, so you can do multiple copies.
+	_clipboard.clone(function(clonedObj) {
+		canvas.discardActiveObject();
+		clonedObj.set({
+			left: clonedObj.left + 10,
+			top: clonedObj.top + 10,
+			evented: true,
+		});
+		if (clonedObj.type === 'activeSelection') {
+			// active selection needs a reference to the canvas.
+			clonedObj.canvas = canvas;
+			clonedObj.forEachObject(function(obj) {
+				canvas.add(obj);
+			});
+			// this should solve the unselectability
+			clonedObj.setCoords();
+		} else {
+			canvas.add(clonedObj);
+		}
+		_clipboard.top += 10;
+		_clipboard.left += 10;
+		canvas.setActiveObject(clonedObj);
+		canvas.requestRenderAll();
+	});
+    }
+     else {
+        console.log('No object has been copied');
+    }
+    }
+  }
+});
+
+
+let carouselData = [
+  [
+    { value: 'Group', id: 'group', handler: () => {} },
+    { value: 'Copy', id: 'copy', handler: copyObjectHandler},
+    { value: 'Paste', id: 'paste', handler: pasteObjectHandler},
+    { value: '123', handler: () => console.log('Paste clicked') }
+  ],
+  [
+    { value: 4, handler: () => console.log('4 clicked') },
+    { value: 5, handler: () => console.log('5 clicked') },
+    { value: 6, handler: () => console.log('6 clicked') }
+  ],
+  [
+    { value: 7, handler: () => console.log('7 clicked') },
+    { value: 8, handler: () => console.log('8 clicked') }
+  ]
+];
+
+
+let menuIndex = 0;
+
+function updateCarousel() {
+  const carouselContent = document.querySelector('.tooltip-carousel-content');
+  carouselContent.innerHTML = '';
+
+  let slideData = [...carouselData[menuIndex]];
+
+  if (menuIndex > 0) slideData.unshift({ value: '<', handler: () => navigate(-1) });
+  if (menuIndex < carouselData.length - 1) slideData.push({ value: '>', handler: () => navigate(1) });
+
+  slideData.forEach((itemData) => {
+    if (itemData.value === '<' || itemData.value === '>') {
+        itemData.handler = (event) => navigate(itemData.value === '>' ? 1 : -1, event);
+    }
+    createCarouselItem(itemData, carouselContent);
+});
+
+//   adjustCarouselWidth();
+}
+
+function createCarouselItem(itemData, carouselContent) {
+    let div = document.createElement('div');
+    div.className = 'tooltip-carousel-item';
+    div.textContent = itemData.value;
+    if (itemData.id) {
+        div.id = itemData.id; // Assign the id
+    }
+    div.addEventListener('click', itemData.handler);
+    carouselContent.appendChild(div);
+}
+
+function addDivider(carouselContent) {
+  let divider = document.createElement('div');
+  divider.className = 'carousel-divider';
+  carouselContent.appendChild(divider);
+}
+
+function navigate(direction, event) {
+    if (event) {
+        event.stopPropagation(); // Prevent the click from being propagated
+    }
+    
+    if (menuIndex + direction >= 0 && menuIndex + direction < carouselData.length) {
+        menuIndex += direction;
+        updateCarousel();
+    }
+}
+
+// function adjustCarouselWidth() {
+//   const carouselContent = document.querySelector('.tooltip-carousel-content');
+//   let totalWidth = 0;
+//   Array.from(carouselContent.children).forEach(child => {
+//     const style = window.getComputedStyle(child);
+//     const margin = parseInt(style.marginLeft) + parseInt(style.marginRight);
+
+//     totalWidth += child.offsetWidth + margin;
+//   });
+
+//   carouselContent.style.width = `${totalWidth}px`;
+// }
+
+// Initialize the carousel
+updateCarousel();
+ </script>
     <script>
+
+
         // function calculateHash(obj) {
         //     const hash = CryptoJS.MD5(obj).toString();
         //     return hash;
         // }
-
+        let isGrouped;
         var canvasHistory = [];
         var currentIndex = -1;
         var isUndoRedoOperation = false;
@@ -242,6 +481,9 @@
             stopContextMenu: true,
             isDrawingMode: !isDrawing
         });
+
+        let pastetext = document.querySelector("#paste");
+        paste.style.display = "none";
 
         fabric.Object.prototype.transparentCorners = false;
         
@@ -386,7 +628,7 @@ drawingModeSelector.onchange = function() {
         fabric.util.addListener(document.getElementsByClassName('upper-canvas')[0], 'contextmenu', function(e) {
             checkGroupedObjects();
             var cnvsPos = $('#canvas-container').offset();
-            curX = e.clientX + cnvsPos.left - 40;
+            curX = e.clientX + cnvsPos.left - 55;
             console.log(curX,cnvsPos.left);
             curY = e.clientY - cnvsPos.top/4;
             console.log(curY,cnvsPos.top);
@@ -397,7 +639,7 @@ drawingModeSelector.onchange = function() {
         });
         $(document).click(function(event) {
         if (!$(event.target).closest('#context-menu').length) {
-            if ($('#context-menu').css("display", "block")) {
+            if ($('#context-menu').css("display", "flex")) {
                 $('#context-menu').css("display", "none");
             }
         }
@@ -406,6 +648,7 @@ drawingModeSelector.onchange = function() {
 
         $(document).on('click', '#group', function(evt) {
             $('#context-menu').hide();
+            console.log(isGrouped);
             if (isGrouped) {
                 canvas.getActiveObject().toActiveSelection();
                 canvas.requestRenderAll();
@@ -417,55 +660,11 @@ drawingModeSelector.onchange = function() {
         });
 
 
-        let pastetext = document.querySelector("#pasteText");
-        pastetext.style.display = "none";
-
-        $(document).on('click', '#copy', function () {
-            // clone what are you copying since you
-            // may want copy and paste on different moment.
-            // and you do not want the changes happened
-            // later to reflect on the copy.
-            $('#context-menu').hide();
-            pastetext.style.display = "flex";
-            canvas.getActiveObject().clone(function(cloned) {
-                _clipboard = cloned;
-            });
-
-        });
 
 
 
-        $(document).on('click', '#paste', function Paste(e) {
-            // clone again, so you can do multiple copies.
-            $('#context-menu').hide();
-            console.log(_clipboard);
-            $('#context-menu').hide();
-            _clipboard.clone(function(clonedObj) {
-                canvas.discardActiveObject();
-                var pointer = canvas.getPointer(e);  // Transform the mouse coordinates
-                clonedObj.set({
-                    left: pointer.x,
-                    top: pointer.y,
-                    evented: true,
-                });
-                if (clonedObj.type === 'activeSelection') {
-                    // active selection needs a reference to the canvas.
-                    clonedObj.canvas = canvas;
-                    clonedObj.forEachObject(function(obj) {
-                        canvas.add(obj);
-                    });
-                    // this should solve the unselectability
-                    clonedObj.setCoords();
-                } else {
-                    canvas.add(clonedObj);
-                }
-                _clipboard.top += 10;
-                _clipboard.left += 10;
-                canvas.setActiveObject(clonedObj);
-                canvas.requestRenderAll();
-            });
-        });
-        
+
+
 
 
 
@@ -547,26 +746,26 @@ drawingModeSelector.onchange = function() {
                     $(".save").html(canvas.toSVG());
         });
 
-        let isGrouped;
+
         function checkGroupedObjects() {
-            let grouptext = document.querySelector("#groupText");
+            let group = document.getElementById("group");
             let activeObject = canvas.getActiveObject();
             // Check if there is an active object
             if (activeObject) {
                 // Check if the active object is a group
+                console.log(activeObject.type);
                 if (activeObject && activeObject.type === 'group') {
-                    grouptext.style.display = "flex";
-                    grouptext.textContent = "Ungroup";
+                    group.style.display = "flex";
+                    group.textContent = "Ungroup";
                     isGrouped = true;
                 } else {
-                    grouptext.style.display = "flex";
-                    grouptext.textContent = "Group";
+                    group.style.display = "flex";
+                    group.textContent = "Group";
                     isGrouped = false;
                 }
             } else {
                 // Default text or action when no object is selected
-                    grouptext.style.display = "none";
-
+                    group.style.display = "none";
             }
         }
 
