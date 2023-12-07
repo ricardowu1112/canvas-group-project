@@ -298,6 +298,7 @@ function copyObjectHandler() {
 pastetext.style.display = "flex";
 canvas.getActiveObject().clone(function(cloned) {
 _clipboard = cloned;
+updatePasteButtonVisibility();
 // console.log(_clipboard);
 })
 }
@@ -329,7 +330,19 @@ function pasteObjectHandler(e) {
                 canvas.setActiveObject(clonedObj);
                 canvas.requestRenderAll();
             });
+            updatePasteButtonVisibility();
 }
+
+function updatePasteButtonVisibility() {
+    let pasteButton = document.getElementById('paste');
+    if (_clipboard) {
+        pasteButton.style.display = "flex";
+    } else {
+        pasteButton.style.display = "none";
+    }
+}
+
+
 
 let _clipboard;
 document.addEventListener('keydown', function(event) {
@@ -436,6 +449,8 @@ function navigate(direction, event) {
     if (menuIndex + direction >= 0 && menuIndex + direction < carouselData.length) {
         menuIndex += direction;
         updateCarousel();
+        updatePasteButtonVisibility(); // Update the visibility of the paste button
+        checkGroupedObjects()
     }
 }
 
@@ -706,6 +721,8 @@ drawingModeSelector.onchange = function() {
 
         // Save initial state
         saveToHistory();
+        updatePasteButtonVisibility();
+
 
         document.addEventListener('keydown', function(event) {
             // Check if the Ctrl key is pressed (Ctrl key has key code 17)

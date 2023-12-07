@@ -296,7 +296,8 @@ body:not(.light-theme) .hover-bg {
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
-  position: fixed;
+  position: absolute;
+  left:-50%;
   display: inline-block;
   top: 110%;
 }
@@ -304,30 +305,74 @@ body:not(.light-theme) .hover-bg {
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
     display: none;
-    position: absolute;
-    background-color: #f1f1f1;
-    min-width: 100px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    padding:5px;
+    background-color: #121316;
+    /* min-width: 100px; */
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
-    left: -30px; /* Align to the left edge of the .dropdown div */
+    left:79px;
     top: 120%; /* Position it below the button */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05); 
+  backdrop-filter: blur(32px);
+  border-radius: 16px;
 }
 
 /* Links inside the dropdown */
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
+.dropdown-content div {
+  color: white;
+  padding: 10px 10px;
   text-decoration: none;
   display: block;
+  cursor: pointer;
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #ddd;}
+.dropdown-content div:hover {background-color: #2589ff;border-radius: 16px;}
 
 /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
-.show {display:block;}
+.show {display:flex;}
+
+._separator_wcxgk_99 {
+    width: 4px;
+    height: 16px;
+    background-color: rgba(255, 255, 255, .05);
+    margin: 0 6px;
+    border-radius: 2px;
+    padding: 2px;
+}
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
       </style>
-<script>
+      <style>
+        #drop-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #000;
+        border: 2px dashed #000;
+        pointer-events: none; /* Allows mouse events to pass through */
+        }
+        #drop-overlay img {
+            max-width: 100px; /* Adjust size as needed */
+        }
+      </style>
+        <script>
     /* When the user clicks on the button, 
     toggle between hiding and showing the dropdown content */
     function createBtn() {
@@ -356,27 +401,63 @@ body:not(.light-theme) .hover-bg {
     <nav class="bg-[rgba(18,19,22,0.95)] shadow-xl rounded-[16px] px-5 py-0">
         <div class="flex items-center justify-between">
             <div class="text-white text-lg mr-5">Logo</div>
-                <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center">
+                <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center" style="cursor: pointer;">
                     <div>
                         <svg onclick="createBtn()" class="dropbtn" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" >
                             <path d="M7.5 2V13M2 7.5H13" stroke="white" stroke-linecap="round"></path>
                         </svg>
+                        <span class="hover-bg"></span>
                         <div class="dropdown">
                             <div id="myDropdown" class="dropdown-content">
-                                <a href="#">Link 1</a>
-                                <a href="#">Link 2</a>
-                                <a href="#">Link 3</a>
+                                <div class="prevent-select">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.50022 6.5C1.50022 6.5 5.17294 -3.49999 8.00022 8C10.8275 19.5 14.5 9.49998 14.5 9.49998" stroke="currentColor" stroke-linecap="round"></path><path d="M3 6.5C3 7.32843 2.32843 8 1.5 8C0.671573 8 0 7.32843 0 6.5C0 5.67157 0.671573 5 1.5 5C2.32843 5 3 5.67157 3 6.5Z" fill="currentColor"></path><path d="M16 9.5C16 10.3284 15.3284 11 14.5 11C13.6716 11 13 10.3284 13 9.5C13 8.67157 13.6716 8 14.5 8C15.3284 8 16 8.67157 16 9.5Z" fill="currentColor"></path></svg>
+                                </div>
+                                <div id="rect">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" class="_typeIcon_12syx_29" color="white"><rect stroke="currentColor" x="1.5" y="1.5" width="13" height="13" rx="2" fill="none" fill-rule="evenodd"></rect></svg>
+                                </div>
+                                <div id="circ"> 
+                                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" class="_typeIcon_12syx_29" color="white"><circle stroke="currentColor" cx="8" cy="8" r="6.5" fill="none" fill-rule="evenodd"></circle></svg>
+                                </div>
+                                <div id="add-text">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" class="_typeIcon_12syx_29" color="white"><path d="M8 3v11.5a.5.5 0 11-1 0V3H1.5a.5.5 0 010-1h12a.5.5 0 110 1H8z" fill="currentColor" fill-rule="evenodd"></path></svg>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
+                <div data-orientation="vertical" aria-orientation="vertical" role="separator" class="_separator_wcxgk_99"></div>
+
+                <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center" style="cursor: pointer;" id="undo">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M17.026 22.957c10.957-11.421-2.326-20.865-10.384-13.309l2.464 2.352h-9.106v-8.947l2.232 2.229c14.794-13.203 31.51 7.051 14.794 17.675z" fill="white"/>
+                          </svg>
+                        <span class="hover-bg"></span>
+                    </div>
+                </div>
+                <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center" style="cursor: pointer;" id="redo">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M17.026 22.957c10.957-11.421-2.326-20.865-10.384-13.309l2.464 2.352h-9.106v-8.947l2.232 2.229c14.794-13.203 31.51 7.051 14.794 17.675z" fill="white" transform="scale(-1, 1) translate(-24, 0)"/>
+                          </svg>
+                        <span class="hover-bg"></span>
+                    </div>
+                </div>
+                <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center" style="cursor: pointer;" id="clear">
+                    <div>
+                        <svg style="color: white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="white"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="white"></path> </svg>
+                        <span class="hover-bg"></span>
+                    </div>
+                </div>
+
+            <div data-orientation="vertical" aria-orientation="vertical" role="separator" class="_separator_wcxgk_99"></div>
             <div class="flex space-x-4 nav-container">
-            <a href="#" class="text-white text-sm nav-link rounded-[16px]">
+            <a href="#" class="text-white text-sm nav-link rounded-[16px] prevent-select">
                 <span class="hover-bg"></span> <!-- Added span for hover effect -->
                 About
             </a>
-            <a href="#" class="text-white text-sm nav-link rounded-[16px]">
+            <a href="#" class="text-white text-sm nav-link rounded-[16px] prevent-select">
                 <span class="hover-bg"></span> <!-- Added span for hover effect -->
                 Contact
             </a>
@@ -405,8 +486,8 @@ body:not(.light-theme) .hover-bg {
               <svg id="moon" class="moon-icon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" style="display: none; transform: rotate(70deg)"><mask id="mask"><rect x="0" y="0" width="100%" height="100%" fill="white"></rect><circle cx="12" cy="4" r="9" fill="black"></circle></mask><circle fill="white" cx="12" cy="12" r="9" mask="url(#mask)"></circle></svg>
               </div>
 <!--               <button id="theme-toggle" class="text-white text-sm">Theme</button> -->
-                <a href="#" class="text-white text-sm">Login</a>
-                <a href="#" class="text-white text-sm">Register</a>
+                <a href="#" class="text-white text-sm prevent-select">Login</a>
+                <a href="#" class="text-white text-sm prevent-select">Register</a>
             </div>
         </div>
     </nav>
@@ -425,16 +506,17 @@ body:not(.light-theme) .hover-bg {
         </div>
     
         <div style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
-            <button id="rect" class="my-1">Rect</button>
-            <button id="circ" class="my-1">Circ</button>
+            <!-- <button id="rect" class="my-1">Rect</button>
+            <button id="circ" class="my-1">Circ</button> -->
             <button id="save" class="my-1">Save</button>
-            <button id="undo" class="my-1">Undo</button>
-            <button id="redo" class="my-1">Redo</button>
-            <button id="clear" class="my-1">Clear</button>
-            <button id="drawing-mode" class="my-1" drawing="false">Enter drawing mode</button>
-            <div class="my-1">
+            <button id="move-to-front" class="my-1">Move to Front</button>
+            <button id="move-up" class="my-1">Move Up</button>
+            <button id="move-to-bottom" class="my-1">Move to Bottom</button>
+            <button id="move-down" class="my-1">Move Down</button>
+            <div id="drawing-mode" class="my-1" drawing="false"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.50022 6.5C1.50022 6.5 5.17294 -3.49999 8.00022 8C10.8275 19.5 14.5 9.49998 14.5 9.49998" stroke="currentColor" stroke-linecap="round"></path><path d="M3 6.5C3 7.32843 2.32843 8 1.5 8C0.671573 8 0 7.32843 0 6.5C0 5.67157 0.671573 5 1.5 5C2.32843 5 3 5.67157 3 6.5Z" fill="currentColor"></path><path d="M16 9.5C16 10.3284 15.3284 11 14.5 11C13.6716 11 13 10.3284 13 9.5C13 8.67157 13.6716 8 14.5 8C15.3284 8 16 8.67157 16 9.5Z" fill="currentColor"></path></svg></div>
+            <!-- <div class="my-1">
                 <input type="text" id="text" class="text-sm rounded text-gray-800" />
-            </div>
+            </div> -->
             <p class="save my-1"></p>
         </div>
     </aside>
@@ -476,11 +558,18 @@ body:not(.light-theme) .hover-bg {
 
     <!-- Main Content -->
 <!--     <main class="flex-1 mx-auto px-4 py-0 bg-gray-900 my-4" style="max-width: 60%; background:Red"> -->
-<div id="canvas-container" style="position: relative !important;display: flex; justify-content: center;align-items: center;max-width: 100%;">
-    <canvas id="c" style="z-index: 5 !important;" width=600 height=600></canvas>
-</div>
 
-</div>
+        <div id="canvas-container" style="position: relative !important;display: flex; justify-content: center;align-items: center;max-width: 100%;">
+            <div style="width: 100%;position: relative;">
+            <canvas id="c" style="z-index: 5 !important;" width=900 height=900></canvas>
+                <div id="drop-overlay" style="display: none;z-index: 9;">
+                    <img src="./img/upload-icon.svg" alt="Drop icon" /> <!-- Drop icon -->
+                </div>
+            <div id="tooltip" style="display: none; position: absolute; background-color: #fff; padding: 5px; border: 1px solid #000;"></div>
+            </div>
+        </div>
+
+
 
     <div class="context-menu" id="context-menu" style="z-index: 6 !important;position: fixed;color:black">
         <div style="position:absolute;"> <!-- Change position to relative here -->
@@ -493,6 +582,7 @@ body:not(.light-theme) .hover-bg {
             <div class="tooltip-arrow"></div> <!-- Tooltip 'nib' -->
         </div>
   </div>
+
 <script>
     function copyObjectHandler() {
         $('#context-menu').hide();
@@ -590,7 +680,25 @@ body:not(.light-theme) .hover-bg {
         { value: 'Group', id: 'group', handler: () => {} },
         { value: 'Copy', id: 'copy', handler: copyObjectHandler},
         { value: 'Paste', id: 'paste', handler: pasteObjectHandler},
-        { value: '123', handler: () => console.log('Paste clicked') }
+        { value: 'Delete',id: 'delete', handler: () => {
+            $('#context-menu').hide();
+            var activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                // Check if the selection is a group of objects
+                if (activeObject.type === 'activeSelection') {
+                    activeObject.forEachObject(function(obj) {
+                        canvas.remove(obj);
+                    });
+                    // Deselect the group after removing its objects
+                    canvas.discardActiveObject();
+                } else {
+                    // If it's a single object, just remove it
+                    canvas.remove(activeObject);
+                }
+                canvas.requestRenderAll();
+                saveToHistory();
+            }
+        }}
       ],
       [
         { value: 4, handler: () => console.log('4 clicked') },
@@ -670,8 +778,118 @@ body:not(.light-theme) .hover-bg {
     
     // Initialize the carousel
     updateCarousel();
-     </script>
-<script>
+
+    // drag and drop
+    const canvasContainer = document.getElementById('canvas-container');
+    const dropOverlay = document.getElementById('drop-overlay');
+
+    canvasContainer.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        dropOverlay.style.display = 'flex'; // Show overlay
+    });
+
+    canvasContainer.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        dropOverlay.style.display = 'none'; // Hide overlay
+    });
+
+    canvasContainer.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropOverlay.style.display = 'none'; // Hide overlay on drop
+
+        // Process the dropped file (as before)
+    });
+    document.addEventListener('dragover', function (e) {
+            e.preventDefault(); // Prevent default behavior for dragover
+        }, false);
+
+        document.getElementById('canvas-container').addEventListener('drop', function (e) {
+    e.preventDefault();
+    dropOverlay.style.display = 'none'; // Hide the overlay
+
+    if (e.dataTransfer.files.length > 0) {
+        var file = e.dataTransfer.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function (event) {
+            fabric.Image.fromURL(event.target.result, function (img) {
+                // Get mouse position relative to the canvas
+                var pointer = canvas.getPointer(e);
+                var posX = pointer.x;
+                var posY = pointer.y;
+
+                // Set the image position
+                img.set({
+                    left: posX,
+                    top: posY,
+                    originX: 'center',
+                    originY: 'center'
+                });
+
+                // Optionally, scale the image if it's too large
+                var maxDimension = Math.max(img.width, img.height);
+                var maxCanvasDimension = Math.min(canvas.getWidth(), canvas.getHeight());
+                if (maxDimension > maxCanvasDimension) {
+                    var scaleRatio = maxCanvasDimension / maxDimension;
+                    img.scale(scaleRatio);
+                }
+
+                // Add the image to the canvas
+                canvas.add(img).renderAll();
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+});
+    // drag and drop
+
+    // move beyond and below
+// Move selected object to front
+document.getElementById('move-to-front').addEventListener('click', function() {
+    var activeObject = canvas.getActiveObject();
+    if (activeObject) {
+        canvas.bringToFront(activeObject);
+        canvas.renderAll(); // Force a render update
+        saveToHistory()
+    }
+});
+
+
+// Move selected object up
+document.getElementById('move-up').addEventListener('click', function() {
+    var activeObject = canvas.getActiveObject();
+    if (activeObject) {
+        canvas.bringForward(activeObject);
+        canvas.renderAll(); // Update the canvas immediately
+        saveToHistory()
+    }
+});
+
+// Move selected object to bottom
+document.getElementById('move-to-bottom').addEventListener('click', function() {
+    var activeObject = canvas.getActiveObject();
+    if (activeObject) {
+        canvas.sendToBack(activeObject);
+        canvas.renderAll(); // Update the canvas immediately
+        saveToHistory()
+    }
+});
+
+// Move selected object down
+document.getElementById('move-down').addEventListener('click', function() {
+    var activeObject = canvas.getActiveObject();
+    if (activeObject) {
+        canvas.sendBackwards(activeObject);
+        canvas.renderAll(); // Update the canvas immediately
+        saveToHistory()
+    }
+});
+
+// move beyond and below
+
+
+        </script>
+        <script>
     
     let isGrouped;
         var canvasHistory = [];
@@ -690,10 +908,14 @@ body:not(.light-theme) .hover-bg {
         var canvas = new fabric.Canvas('c',{
             fireRightClick: true,
             stopContextMenu: true,
-            isDrawingMode: !isDrawing
+            isDrawingMode: !isDrawing,
+            preserveObjectStacking: true,
+            
         });
 
         
+
+        fabric.Object.prototype.cornerSize = 8; // Adjust the size as needed
         $(document).bind('contextmenu', function(e) {
             e.preventDefault();
         });
@@ -706,12 +928,10 @@ body:not(.light-theme) .hover-bg {
         drawingModeEl.onclick = function() {
             canvas.isDrawingMode = !canvas.isDrawingMode;
             if (canvas.isDrawingMode) {
-            drawingModeEl.innerHTML = 'Cancel drawing mode';
-            drawingOptionsEl.style.display = '';
+            drawingModeEl.style.background="red"
             }
             else {
-            drawingModeEl.innerHTML = 'Enter drawing mode';
-            // drawingOptionsEl.style.display = 'none';
+            drawingModeEl.style.background="none"
             }
         };
 
@@ -731,6 +951,8 @@ body:not(.light-theme) .hover-bg {
             }
 
         if (canvas.freeDrawingBrush) {
+            var brush = canvas.freeDrawingBrush;
+            brush.color = drawingColorEl.value;
             canvas.freeDrawingBrush.color = drawingColorEl.value;
             canvas.freeDrawingBrush.width = parseInt(drawingLineWidthEl.value, 10) || 1;
             canvas.freeDrawingBrush.shadow = new fabric.Shadow({
@@ -775,24 +997,110 @@ body:not(.light-theme) .hover-bg {
             });
         }
 
-        $("#text").on("click", function(e) {
-            const text = new fabric.Text($("#text").val(), { left: 100, top: 100 });
-            canvas.add(text);
+
+
+        // Draw rectangle//////////////////////////////////////////////////////////////////////////////
+        // 
+        let isDrawingRectangleMode = false; // New global variable to track drawing mode
+let startX, startY, currentRect, tooltip;
+
+$("#rect").on("click", function(e) {
+    isDrawingRectangleMode = !isDrawingRectangleMode; // Toggle drawing mode
+    if (isDrawingRectangleMode) {
+        canvas.defaultCursor = 'crosshair'; // Change cursor to crosshair
+    } else {
+        canvas.defaultCursor = 'default'; // Reset cursor to default
+    }
+});
+
+canvas.on("mouse:down", function(e) {
+    if (isDrawingRectangleMode) {
+        const pointer = canvas.getPointer(e.e);
+        startX = pointer.x;
+        startY = pointer.y;
+        currentRect = new fabric.Rect({
+            left: startX,
+            top: startY,
+            width: 0,
+            height: 0,
+            fill: 'transparent',
+            stroke: 'green',
+            strokeWidth: 5
+        });
+        canvas.add(currentRect);
+    }
+});
+
+// Mouse move event
+canvas.on("mouse:move", function(e) {
+    if (isDrawingRectangleMode && currentRect) {
+        const pointer = canvas.getPointer(e.e);
+        let width = pointer.x - startX;
+        let height = pointer.y - startY;
+
+        // Adjust the position and dimensions for negative width/height
+        currentRect.set({
+            left: width > 0 ? startX : pointer.x,
+            top: height > 0 ? startY : pointer.y,
+            width: Math.abs(width),
+            height: Math.abs(height)
         });
 
-        $("#rect").on("click", function(e) {
-            const rect = new fabric.Rect({
-                left: 40, top: 40, width: 50, height: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
-            });
-            canvas.add(rect);
-        });
+        currentRect.setCoords();
+        canvas.renderAll();
 
+        // Update tooltip
+        updateTooltip(e.e.clientX, e.e.clientY, Math.abs(width), Math.abs(height));
+    }
+});
+
+
+
+function updateTooltip(x, y, width, height) {
+    width = Math.round(width);
+    height = Math.round(height);
+
+    // Create tooltip if it doesn't exist
+    if (!tooltip) {
+        tooltip = document.createElement("div");
+        tooltip.id = "tooltip";
+        tooltip.style.position = "fixed";
+        tooltip.style.backgroundColor = "black";
+        tooltip.style.padding = "5px";
+        tooltip.style.border = "1px solid black";
+        tooltip.style.zIndex = "12";
+        document.body.appendChild(tooltip);
+    }
+
+    // Offset from the cursor
+    const tooltipOffsetX = 10; // Offset from the cursor in the X-axis
+    const tooltipOffsetY = 10; // Offset from the cursor in the Y-axis
+
+    tooltip.style.display = "block";
+    tooltip.style.left = (x + tooltipOffsetX) + "px";
+    tooltip.style.top = (y + tooltipOffsetY) + "px";
+    tooltip.textContent = `Width: ${width}, Height: ${height}`;
+}
+
+canvas.on("mouse:up", function() {
+    if (isDrawingRectangleMode && currentRect) {
+        isDrawingRectangleMode = false; // Reset drawing mode
+        canvas.defaultCursor = 'default'; // Reset cursor to default
+        tooltip.style.display = "none"; // Hide the tooltip
+        currentRect = null; // Reset currentRect for the next drawing
+    }
+});
+
+        // 
+        // 
         $("#circ").on("click", function(e) {
             const circle = new fabric.Circle({
                 left: 40, top: 40, radius: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
             });
             canvas.add(circle);
         });
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Function to save the current canvas state to history
@@ -917,19 +1225,24 @@ function saveToHistory() {
         // Function to remove the selected object
         function removeSelectedObject() {
             var activeObject = canvas.getActiveObject();
+
             if (activeObject) {
-                canvas.remove(activeObject);
+                // Check if the selection is a group of objects
+                if (activeObject.type === 'activeSelection') {
+                    activeObject.forEachObject(function(obj) {
+                        canvas.remove(obj);
+                    });
+                    // Deselect the group after removing its objects
+                    canvas.discardActiveObject();
+                } else {
+                    // If it's a single object, just remove it
+                    canvas.remove(activeObject);
+                }
+                canvas.requestRenderAll();
                 saveToHistory();
             }
         }
 
-        // Binding the Backspace key to remove the selected object
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Backspace' || event.key === 'Delete') {
-                event.preventDefault(); // Prevent the default backspace action
-                removeSelectedObject();
-            }
-        });
 
 
         $("#save").on("click", function(e) {
@@ -993,6 +1306,68 @@ function saveToHistory() {
 
 // $("#save").on("click", function(e) {
 //   	$(".save").html(canvas.toSVG());
+// });
+
+// text mode
+var isTextMode = false;
+var placeholderText = 'Edit me'; // Placeholder text
+
+// Toggle text adding mode and change cursor
+document.getElementById('add-text').addEventListener('click', function() {
+    isTextMode = !isTextMode;
+    canvas.defaultCursor = isTextMode ? 'text' : 'default';
+    canvas.renderAll(); // Re-render the canvas to apply the cursor change
+});
+
+// Add a text box at the click position and revert cursor
+canvas.on('mouse:down', function(options) {
+    if (isTextMode) {
+        var pointer = canvas.getPointer(options.e);
+        var text = new fabric.IText(placeholderText, {
+            left: pointer.x,
+            top: pointer.y,
+            fontFamily: 'Titillium Web',
+            fill: 'black',
+            fontStyle: 'italic',
+            fontSize: 23,
+            opacity: 0.5
+        });
+
+        text.on('editing:entered', function() {
+            if (this.text === placeholderText) {
+                this.text = '';
+                this.opacity = 1; // Reset opacity
+                this.fontStyle = 'normal'; // Reset font style
+            }
+        });
+
+        text.on('editing:exited', function() {
+            if (this.text === '') {
+                this.text = placeholderText;
+                this.opacity = 0.5; // Apply transparency
+                this.fontStyle = 'italic'; // Apply italic font style
+            }
+        });
+
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        text.enterEditing();
+        text.selectAll();
+
+        isTextMode = false; // Turn off text mode after adding the text box
+        canvas.defaultCursor = 'default'; // Set the cursor back to default
+        canvas.renderAll(); // Re-render the canvas to apply the cursor change
+    }
+});
+
+//         // Binding the Backspace key to remove the selected object
+//         document.addEventListener('keydown', function(event) {
+//     console.log(isTextMode);
+//     if ((event.key === 'Backspace' || event.key === 'Delete') && !isTextMode) {
+//         event.preventDefault(); // Prevent the default backspace action
+//         removeSelectedObject(); // Remove the selected object
+//     }
+//     // If isTextMode is true, the default behavior (editing text) will occur
 // });
 
 
