@@ -513,6 +513,7 @@ body:not(.light-theme) .hover-bg {
             <button id="move-up" class="my-1">Move Up</button>
             <button id="move-to-bottom" class="my-1">Move to Bottom</button>
             <button id="move-down" class="my-1">Move Down</button>
+            <button id="select-mode">Select Mode</button>
             <div id="drawing-mode" class="my-1" drawing="false"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.50022 6.5C1.50022 6.5 5.17294 -3.49999 8.00022 8C10.8275 19.5 14.5 9.49998 14.5 9.49998" stroke="currentColor" stroke-linecap="round"></path><path d="M3 6.5C3 7.32843 2.32843 8 1.5 8C0.671573 8 0 7.32843 0 6.5C0 5.67157 0.671573 5 1.5 5C2.32843 5 3 5.67157 3 6.5Z" fill="currentColor"></path><path d="M16 9.5C16 10.3284 15.3284 11 14.5 11C13.6716 11 13 10.3284 13 9.5C13 8.67157 13.6716 8 14.5 8C15.3284 8 16 8.67157 16 9.5Z" fill="currentColor"></path></svg></div>
             <!-- <div class="my-1">
                 <input type="text" id="text" class="text-sm rounded text-gray-800" />
@@ -890,176 +891,162 @@ document.getElementById('move-down').addEventListener('click', function() {
 
         </script>
         <script>
-    
+    document.getElementById('select-mode').onclick = function() { toggleDrawingMode('select'); };
+
+
+
     let isGrouped;
-        var canvasHistory = [];
-        var currentIndex = -1;
-        var isUndoRedoOperation = false;
-        var historySizeLimit = 20; // Set the maximum size of the history
-        var drawingModeEl = document.getElementById('drawing-mode');
-        var isDrawing = drawingModeEl.getAttribute('drawing');
+// Initialization and setup
+var canvasHistory = [];
+var currentIndex = -1;
+var isUndoRedoOperation = false;
+var historySizeLimit = 20; // Set the maximum size of the history
+var drawingModeEl = document.getElementById('drawing-mode');
+var isDrawing = drawingModeEl.getAttribute('drawing');
 
-        var drawingOptionsEl = document.getElementById('drawing-mode-options');
-        var drawingColorEl = document.getElementById('drawing-color');
-        var drawingShadowColorEl = document.getElementById('drawing-shadow-color');
-        var drawingLineWidthEl = document.getElementById('drawing-line-width');
-        var drawingShadowWidth = document.getElementById('drawing-shadow-width');
-        var drawingShadowOffset = document.getElementById('drawing-shadow-offset');
-        var canvas = new fabric.Canvas('c',{
-            fireRightClick: true,
-            stopContextMenu: true,
-            isDrawingMode: !isDrawing,
-            preserveObjectStacking: true,
-            
-        });
-
-        
-
-        fabric.Object.prototype.cornerSize = 8; // Adjust the size as needed
-        $(document).bind('contextmenu', function(e) {
-            e.preventDefault();
-        });
-
-        let pastetext = document.querySelector("#paste");
-        // paste.style.display = "none";
-
-        fabric.Object.prototype.transparentCorners = false;
-
-        drawingModeEl.onclick = function() {
-            canvas.isDrawingMode = !canvas.isDrawingMode;
-            if (canvas.isDrawingMode) {
-            drawingModeEl.style.background="red"
-            }
-            else {
-            drawingModeEl.style.background="none"
-            }
-        };
-
-        let drawingModeSelector = document.getElementById('drawing-mode-selector');
-        drawingModeSelector.onchange = function() {
-        let isDrawingTool = ['Pencil', 'Circle', 'Spray'].includes(this.value);
-
-        if (isDrawingTool) {
-            canvas.isDrawingMode = true;
-
-            switch (this.value) {
-                default:
-                    canvas.freeDrawingBrush = new fabric[this.value + 'Brush'](canvas);
-            }
-            } else {
-                canvas.isDrawingMode = false;
-            }
-
-        if (canvas.freeDrawingBrush) {
-            var brush = canvas.freeDrawingBrush;
-            brush.color = drawingColorEl.value;
-            canvas.freeDrawingBrush.color = drawingColorEl.value;
-            canvas.freeDrawingBrush.width = parseInt(drawingLineWidthEl.value, 10) || 1;
-            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-                blur: parseInt(drawingShadowWidth.value, 10) || 0,
-                offsetX: 0,
-                offsetY: 0,
-                affectStroke: true,
-                color: drawingShadowColorEl.value,
-                });
-            }
-        };
-
-        drawingColorEl.oninput = function() {
-            canvas.freeDrawingBrush.color = this.value;
-        };
-        drawingShadowColorEl.oninput = function() {
-            canvas.freeDrawingBrush.shadow.color = this.value;
-        };
-        drawingLineWidthEl.onchange = function() {
-            canvas.freeDrawingBrush.width = parseInt(this.value, 10) || 1;
-            this.previousSibling.innerHTML = this.value;
-        };
-        drawingShadowWidth.onchange = function() {
-            canvas.freeDrawingBrush.shadow.blur = parseInt(this.value, 10) || 0;
-            this.previousSibling.innerHTML = this.value;
-        };
-        drawingShadowOffset.onchange = function() {
-            canvas.freeDrawingBrush.shadow.offsetX = parseInt(this.value, 10) || 0;
-            canvas.freeDrawingBrush.shadow.offsetY = parseInt(this.value, 10) || 0;
-            this.previousSibling.innerHTML = this.value;
-        };
-
-        if (canvas.freeDrawingBrush) {
-            canvas.freeDrawingBrush.color = drawingColorEl.value;
-            canvas.freeDrawingBrush.width = parseInt(drawingLineWidthEl.value, 10) || 1;
-            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-            blur: parseInt(drawingShadowWidth.value, 10) || 0,
-            offsetX: 0,
-            offsetY: 0,
-            affectStroke: true,
-            color: drawingShadowColorEl.value,
-            });
-        }
-
-
-
-        // Draw rectangle//////////////////////////////////////////////////////////////////////////////
-        // 
-        let isDrawingRectangleMode = false; // New global variable to track drawing mode
-let startX, startY, currentRect, tooltip;
-
-$("#rect").on("click", function(e) {
-    isDrawingRectangleMode = !isDrawingRectangleMode; // Toggle drawing mode
-    if (isDrawingRectangleMode) {
-        canvas.defaultCursor = 'crosshair'; // Change cursor to crosshair
-    } else {
-        canvas.defaultCursor = 'default'; // Reset cursor to default
-    }
+var drawingOptionsEl = document.getElementById('drawing-mode-options');
+var drawingColorEl = document.getElementById('drawing-color');
+var drawingShadowColorEl = document.getElementById('drawing-shadow-color');
+var drawingLineWidthEl = document.getElementById('drawing-line-width');
+var drawingShadowWidth = document.getElementById('drawing-shadow-width');
+var drawingShadowOffset = document.getElementById('drawing-shadow-offset');
+var canvas = new fabric.Canvas('c', {
+    fireRightClick: true,
+    stopContextMenu: true,
+    isDrawingMode: !isDrawing,
+    preserveObjectStacking: true,
 });
 
+fabric.Object.prototype.cornerSize = 8; // Adjust the size as needed
+fabric.Object.prototype.transparentCorners = false;
+
+$(document).bind('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+let pastetext = document.querySelector("#paste");
+
+// New global variables for drawing modes
+let isDrawingRectangleMode = false;
+let isDrawingCircleMode = false;
+let currentShape; // Current drawing shape (rectangle or circle)
+let startX, startY; // Starting point coordinates
+let tooltip; // Tooltip for dimensions display
+
+// Initialize free drawing settings (but do not set it as active)
+function initializeFreeDrawing() {
+    var brush = new fabric.PencilBrush(canvas);
+    brush.color = drawingColorEl.value;
+    brush.width = parseInt(drawingLineWidthEl.value, 10) || 1;
+    brush.shadow = new fabric.Shadow({
+        blur: parseInt(drawingShadowWidth.value, 10) || 0,
+        offsetX: parseInt(drawingShadowOffset.value, 10) || 0,
+        offsetY: parseInt(drawingShadowOffset.value, 10) || 0,
+        affectStroke: true,
+        color: drawingShadowColorEl.value,
+    });
+    return brush;
+}
+// Assign the initialized brush to the canvas (without enabling drawing mode)
+canvas.freeDrawingBrush = initializeFreeDrawing();
+
+// Function to toggle drawing mode
+function toggleDrawingMode(mode) {
+    // Check if free drawing mode is already active
+    if (mode === 'free' && canvas.isDrawingMode) {
+        canvas.isDrawingMode = false;
+        canvas.defaultCursor = 'default';
+        return; // Exit the function early
+    }
+
+    // Reset all drawing modes
+    isDrawingRectangleMode = false;
+    isDrawingCircleMode = false;
+    canvas.isDrawingMode = false;
+    canvas.defaultCursor = 'default'; // Reset cursor to default
+
+    // Additional logic based on the mode
+    switch (mode) {
+        case 'rectangle':
+            isDrawingRectangleMode = true;
+            canvas.defaultCursor = 'crosshair';
+            break;
+        case 'circle':
+            isDrawingCircleMode = true;
+            canvas.defaultCursor = 'crosshair';
+            break;
+        case 'free':
+            canvas.isDrawingMode = true;
+            break;
+        case 'select':
+            // No additional actions needed for select mode
+            break;
+    }
+}
+
+
+// Event listeners for drawing mode buttons
+document.getElementById('rect').onclick = function() { toggleDrawingMode('rectangle'); };
+document.getElementById('circ').onclick = function() { toggleDrawingMode('circle'); };
+drawingModeEl.onclick = function() { toggleDrawingMode('free'); };
+
 canvas.on("mouse:down", function(e) {
-    if (isDrawingRectangleMode) {
+    if (isDrawingRectangleMode || isDrawingCircleMode) {
         const pointer = canvas.getPointer(e.e);
+        const currentColor = drawingColorEl.value; // Get the current selected color
+
         startX = pointer.x;
         startY = pointer.y;
-        currentRect = new fabric.Rect({
+        currentShape = isDrawingRectangleMode ? new fabric.Rect({
             left: startX,
             top: startY,
             width: 0,
             height: 0,
             fill: 'transparent',
-            stroke: 'green',
+            stroke: currentColor, // Use the selected color
             strokeWidth: 5
+        }) : new fabric.Circle({
+            left: startX,
+            top: startY,
+            radius: 0,
+            fill: 'transparent',
+            stroke: currentColor, // Use the selected color
+            strokeWidth: 5,
+            originX: 'center',
+            originY: 'center'
         });
-        canvas.add(currentRect);
+
+        canvas.add(currentShape);
     }
 });
 
-// Mouse move event
+// Mouse move event for updating shapes
 canvas.on("mouse:move", function(e) {
-    if (isDrawingRectangleMode && currentRect) {
+    if ((isDrawingRectangleMode || isDrawingCircleMode) && currentShape) {
         const pointer = canvas.getPointer(e.e);
-        let width = pointer.x - startX;
-        let height = pointer.y - startY;
 
-        // Adjust the position and dimensions for negative width/height
-        currentRect.set({
-            left: width > 0 ? startX : pointer.x,
-            top: height > 0 ? startY : pointer.y,
-            width: Math.abs(width),
-            height: Math.abs(height)
-        });
+        if (isDrawingRectangleMode) {
+            let width = pointer.x - startX;
+            let height = pointer.y - startY;
+            currentShape.set({
+                left: width > 0 ? startX : pointer.x,
+                top: height > 0 ? startY : pointer.y,
+                width: Math.abs(width),
+                height: Math.abs(height)
+            });
+        } else if (isDrawingCircleMode) {
+            let radius = Math.sqrt(Math.pow(pointer.x - startX, 2) + Math.pow(pointer.y - startY, 2));
+            currentShape.set({ radius: radius });
+        }
 
-        currentRect.setCoords();
+        currentShape.setCoords();
         canvas.renderAll();
-
-        // Update tooltip
-        updateTooltip(e.e.clientX, e.e.clientY, Math.abs(width), Math.abs(height));
+        updateTooltip(e.e.clientX, e.e.clientY, currentShape);
     }
 });
 
-
-
-function updateTooltip(x, y, width, height) {
-    width = Math.round(width);
-    height = Math.round(height);
-
+// Function to update the tooltip
+function updateTooltip(x, y, shape) {
     // Create tooltip if it doesn't exist
     if (!tooltip) {
         tooltip = document.createElement("div");
@@ -1072,33 +1059,89 @@ function updateTooltip(x, y, width, height) {
         document.body.appendChild(tooltip);
     }
 
-    // Offset from the cursor
-    const tooltipOffsetX = 10; // Offset from the cursor in the X-axis
-    const tooltipOffsetY = 10; // Offset from the cursor in the Y-axis
-
+    // Display tooltip with dimensions
     tooltip.style.display = "block";
-    tooltip.style.left = (x + tooltipOffsetX) + "px";
-    tooltip.style.top = (y + tooltipOffsetY) + "px";
-    tooltip.textContent = `Width: ${width}, Height: ${height}`;
+    tooltip.style.left = (x + 10) + "px";
+    tooltip.style.top = (y + 10) + "px";
+
+    if (isDrawingRectangleMode) {
+        let width = Math.round(shape.width);
+        let height = Math.round(shape.height);
+        tooltip.textContent = `Width: ${width}, Height: ${height}`;
+    } else if (isDrawingCircleMode) {
+        let radius = Math.round(shape.radius);
+        tooltip.textContent = `Radius: ${radius}`;
+    }
 }
 
+// Mouse up event to finalize shape drawing
 canvas.on("mouse:up", function() {
-    if (isDrawingRectangleMode && currentRect) {
+    if (isDrawingRectangleMode && currentShape) {
         isDrawingRectangleMode = false; // Reset drawing mode
         canvas.defaultCursor = 'default'; // Reset cursor to default
         tooltip.style.display = "none"; // Hide the tooltip
-        currentRect = null; // Reset currentRect for the next drawing
+        currentShape = null; // Reset currentShape for the next drawing
+    } else if (isDrawingCircleMode && currentShape) {
+        isDrawingCircleMode = false; // Reset drawing mode
+        canvas.defaultCursor = 'default'; // Reset cursor to default
+        tooltip.style.display = "none"; // Hide the tooltip
+        currentShape = null; // Reset currentShape for the next drawing
     }
 });
 
-        // 
-        // 
-        $("#circ").on("click", function(e) {
-            const circle = new fabric.Circle({
-                left: 40, top: 40, radius: 50, fill: 'transparent', stroke: 'green', strokeWidth: 5
-            });
-            canvas.add(circle);
+// Additional code for free drawing brush configuration
+let drawingModeSelector = document.getElementById('drawing-mode-selector');
+drawingModeSelector.onchange = function() {
+    let isDrawingTool = ['Pencil', 'Circle', 'Spray'].includes(this.value);
+
+    if (isDrawingTool) {
+        canvas.isDrawingMode = true;
+        canvas.freeDrawingBrush = new fabric[this.value + 'Brush'](canvas);
+        canvas.freeDrawingBrush.color = drawingColorEl.value;
+        canvas.freeDrawingBrush.width = parseInt(drawingLineWidthEl.value, 10) || 1;
+        canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+            blur: parseInt(drawingShadowWidth.value, 10) || 0,
+            offsetX: parseInt(drawingShadowOffset.value, 10) || 0,
+            offsetY: parseInt(drawingShadowOffset.value, 10) || 0,
+            affectStroke: true,
+            color: drawingShadowColorEl.value,
         });
+    } else {
+        canvas.isDrawingMode = false;
+    }
+};
+
+var currentDrawingColor;
+drawingColorEl.oninput = function() {
+    // if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.color = this.value;
+    // }
+};
+drawingShadowColorEl.oninput = function() {
+    if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.shadow.color = this.value;
+    }
+};
+drawingLineWidthEl.onchange = function() {
+    if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.width = parseInt(this.value, 10) || 1;
+    }
+};
+drawingShadowWidth.onchange = function() {
+    if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.shadow.blur = parseInt(this.value, 10) || 0;
+    }
+};
+drawingShadowOffset.onchange = function() {
+    if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.shadow.offsetX = parseInt(this.value, 10) || 0;
+        canvas.freeDrawingBrush.shadow.offsetY = parseInt(this.value, 10) || 0;
+    }
+};
+drawingModeEl.onclick = function() { toggleDrawingMode('free'); };
+
+// Other functionalities can be added below as needed
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
