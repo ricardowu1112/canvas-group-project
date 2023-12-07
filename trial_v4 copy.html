@@ -330,6 +330,7 @@ body:not(.light-theme) .hover-bg {
   cursor: pointer;
 }
 
+
 /* Change color of dropdown links on hover */
 .dropdown-content div:hover {background-color: #2589ff;border-radius: 16px;}
 
@@ -403,13 +404,13 @@ body:not(.light-theme) .hover-bg {
             <div class="text-white text-lg mr-5">Logo</div>
                 <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center" style="cursor: pointer;">
                     <div>
-                        <svg onclick="createBtn()" class="dropbtn" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" >
+                        <svg onclick="createBtn()" class="dropbtn" width="16" height="16" viewBox="0 0 16 16"  fill="none" xmlns="http://www.w3.org/2000/svg" >
                             <path d="M7.5 2V13M2 7.5H13" stroke="white" stroke-linecap="round"></path>
                         </svg>
                         <span class="hover-bg"></span>
                         <div class="dropdown">
                             <div id="myDropdown" class="dropdown-content">
-                                <div class="prevent-select">
+                                <div id="drawing-mode" class="my-1" drawing="false">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.50022 6.5C1.50022 6.5 5.17294 -3.49999 8.00022 8C10.8275 19.5 14.5 9.49998 14.5 9.49998" stroke="currentColor" stroke-linecap="round"></path><path d="M3 6.5C3 7.32843 2.32843 8 1.5 8C0.671573 8 0 7.32843 0 6.5C0 5.67157 0.671573 5 1.5 5C2.32843 5 3 5.67157 3 6.5Z" fill="currentColor"></path><path d="M16 9.5C16 10.3284 15.3284 11 14.5 11C13.6716 11 13 10.3284 13 9.5C13 8.67157 13.6716 8 14.5 8C15.3284 8 16 8.67157 16 9.5Z" fill="currentColor"></path></svg>
                                 </div>
                                 <div id="rect">
@@ -423,6 +424,15 @@ body:not(.light-theme) .hover-bg {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                
+                <div data-orientation="vertical" aria-orientation="vertical" role="separator" class="_separator_wcxgk_99"></div>
+
+                <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center" style="cursor: pointer;" id="select-mode">
+                    <div>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 14.5L2 2L14.5 6.5L8 8.5L6 14.5Z" stroke="white" stroke-linejoin="round"></path></svg>
+                        <span class="hover-bg" id="create-hover-bg"></span>
                     </div>
                 </div>
 
@@ -513,8 +523,7 @@ body:not(.light-theme) .hover-bg {
             <button id="move-up" class="my-1">Move Up</button>
             <button id="move-to-bottom" class="my-1">Move to Bottom</button>
             <button id="move-down" class="my-1">Move Down</button>
-            <button id="select-mode">Select Mode</button>
-            <div id="drawing-mode" class="my-1" drawing="false"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.50022 6.5C1.50022 6.5 5.17294 -3.49999 8.00022 8C10.8275 19.5 14.5 9.49998 14.5 9.49998" stroke="currentColor" stroke-linecap="round"></path><path d="M3 6.5C3 7.32843 2.32843 8 1.5 8C0.671573 8 0 7.32843 0 6.5C0 5.67157 0.671573 5 1.5 5C2.32843 5 3 5.67157 3 6.5Z" fill="currentColor"></path><path d="M16 9.5C16 10.3284 15.3284 11 14.5 11C13.6716 11 13 10.3284 13 9.5C13 8.67157 13.6716 8 14.5 8C15.3284 8 16 8.67157 16 9.5Z" fill="currentColor"></path></svg></div>
+            
             <!-- <div class="my-1">
                 <input type="text" id="text" class="text-sm rounded text-gray-800" />
             </div> -->
@@ -583,6 +592,20 @@ body:not(.light-theme) .hover-bg {
             <div class="tooltip-arrow"></div> <!-- Tooltip 'nib' -->
         </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var dropdownItems = document.querySelectorAll('.dropdown-content div');
+    var createBtn = document.getElementById('create-btn');
+
+    dropdownItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+            // Add 'active' class to createBtn
+            createBtn.classList.add('active');
+        });
+    });
+});
+  </script>
 
 <script>
     function copyObjectHandler() {
@@ -1017,6 +1040,7 @@ canvas.on("mouse:down", function(e) {
         });
 
         canvas.add(currentShape);
+
     }
 });
 
@@ -1087,6 +1111,7 @@ canvas.on("mouse:up", function() {
         tooltip.style.display = "none"; // Hide the tooltip
         currentShape = null; // Reset currentShape for the next drawing
     }
+    console.log(canvasHistory)
 });
 
 // Additional code for free drawing brush configuration
@@ -1235,8 +1260,6 @@ function saveToHistory() {
 
         document.getElementById("clear").addEventListener("click", function () {
             canvas.clear();
-            console.log(canvasHistory);
-            console.log(currentIndex);
             console.log(canvasHistory[currentIndex]);
             // canvas.setBackgroundColor('white', canvas.renderAll.bind(canvas));
             saveToHistory();
