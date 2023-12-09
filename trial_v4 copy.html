@@ -9,7 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <Script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script
+    src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+    crossorigin="anonymous"></script>
         <!-- Flowbite -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
@@ -524,9 +527,9 @@ body:not(.light-theme) .hover-bg {
                 <!-- <button data-modal-target="authentication-modal" data-modal-toggle="authentication-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"> -->
                     <!-- Toggle modal -->
                   <!-- </button> -->
-                <a class="text-white text-sm prevent-select login-button" id="logout-text" style="padding: 5px; display: none;">Logout</a>
+                <a class="text-white text-sm prevent-select login-button" onclick="logOut()"  id="logout-text" data-modal-target="authentication-modal" data-modal-toggle="authentication-modal" type="button" style="padding: 5px; display: none;">Logout</a>
                   
-                <a id="register-text" onclick="logOut()" class="text-white text-sm prevent-select login-button" style="padding: 5px;" data-modal-target="register-modal" data-modal-toggle="register-modal" type="button">Register</a>
+                <a id="register-text" class="text-white text-sm prevent-select login-button" style="padding: 5px;" data-modal-target="register-modal" data-modal-toggle="register-modal" type="button">Register</a>
             </div>
         </div>
     </nav>
@@ -649,10 +652,11 @@ body:not(.light-theme) .hover-bg {
         }
 
         function logOut(){
-            localStorage.clear();
-            loginText.style.display = "flex";
+
+            loginText.style.display = "unset";
             logoutText.style.display = "none";
-            registerText.style.display = "flex";
+            registerText.style.display = "unset";
+            localStorage.clear();
         }
             
 
@@ -841,7 +845,6 @@ body:not(.light-theme) .hover-bg {
     });
 });
   </script>
-<script src="json2.js"></script>
 <script>
     function copyObjectHandler() {
         $('#context-menu').hide();
@@ -1165,7 +1168,7 @@ document.getElementById('move-down').addEventListener('click', function() {
 // var currentIndex = -1;
 
 var isUndoRedoOperation = false;
-var historySizeLimit = 20; // Set the maximum size of the history
+var historySizeLimit = 10; // Set the maximum size of the history
 var drawingModeEl = document.getElementById('drawing-mode');
 var isDrawing = drawingModeEl.getAttribute('drawing');
 
@@ -1418,15 +1421,15 @@ var currentIndex = -1;
         
         
 function init(){
-                canvasHistory =  localStorage.getItem('historyArray')? JSON.parse(localStorage.getItem('historyArray')) : [];
-                currentIndex = localStorage.getItem('currentIndex')? JSON.parse(localStorage.getItem('currentIndex')) : -1;
+                // canvasHistory =  localStorage.getItem('historyArray')? JSON.parse(localStorage.getItem('historyArray')) : [];
+                // currentIndex = localStorage.getItem('currentIndex')? JSON.parse(localStorage.getItem('currentIndex')) : -1;
                 canvas.loadFromJSON(canvasHistory[currentIndex], function() {
                     canvas.renderAll();
                 });
                 const currentCanvasState = JSON.stringify(canvas.toJSON());
 
                 console.log(currentIndex);
-                console.log(JSON.parse(localStorage.getItem('historyArray')));
+
                 // Check if the current state is different from the last saved state
                 const lastSavedState = canvasHistory[currentIndex];
                 if (currentCanvasState !== lastSavedState) {
@@ -1434,14 +1437,22 @@ function init(){
                     canvasHistory = canvasHistory.slice(0, currentIndex + 1);
                     currentIndex++;
                     canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
-                    localStorage.setItem('historyArray', JSON.stringify(canvasHistory));
-                    localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
+
                     // Drop the oldest states until the history size is within the limit
                     while (canvasHistory.length > historySizeLimit) {
                         canvasHistory.shift();
                         currentIndex--;
                         if (currentIndex < 0) {
                             currentIndex = 0; // Ensures currentIndex doesn't go below 0
+                        }
+                    }
+                    try {
+                    // localStorage.setItem('historyArray', JSON.stringify(canvasHistory));
+                    // localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
+                    } catch (e) {
+                    if (e instanceof DOMException && e.code === DOMException.QUOTA_EXCEEDED_ERR) {
+                        // Handle storage limit exceeded error
+                        // Example: Notify user, clear old data, etc.
                         }
                     }
                 }
@@ -1459,19 +1470,29 @@ function saveToHistory() {
                     canvasHistory = canvasHistory.slice(0, currentIndex + 1);
                     currentIndex++;
                     canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
-                    localStorage.setItem('historyArray', JSON.stringify(canvasHistory));
-                    localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
+                    
                     // Drop the oldest states until the history size is within the limit
                     while (canvasHistory.length > historySizeLimit) {
                         canvasHistory.shift();
                         currentIndex--;
+                        
                         if (currentIndex < 0) {
                             currentIndex = 0; // Ensures currentIndex doesn't go below 0
+                            // localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
                         }
+                    }
+                    try {
+                    // localStorage.setItem('historyArray', JSON.stringify(canvasHistory));
+                    // localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
+                    } catch (e) {
+                    if (e instanceof DOMException && e.code === DOMException.QUOTA_EXCEEDED_ERR) {
+                        // Handle storage limit exceeded error
+                        // Example: Notify user, clear old data, etc.
                     }
                 }
             }
         }
+    }
 
         // Fabric.js events to detect changes
         canvas.on('object:modified', saveToHistory);
