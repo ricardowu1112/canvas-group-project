@@ -418,7 +418,7 @@ body:not(.light-theme) .hover-bg {
 
 <!-- Floating Navbar -->
 <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
-    <nav class="bg-[rgba(18,19,22,0.95)] shadow-xl rounded-[16px] px-5 py-0">
+    <nav class="bg-[rgba(18,19,22,0.95)] shadow-xl rounded-[16px] px-5 py-0" style="border: 1px solid white;">
         <div class="flex items-center justify-between">
             <div class="text-white text-lg mr-5">Logo</div>
                 <div class="text-white text-sm nav-link rounded-[16px] flex items-center justify-center" style="cursor: pointer;">
@@ -552,12 +552,12 @@ body:not(.light-theme) .hover-bg {
                     body: JSON.stringify({
                         username: usernameLogin, // Replace with actual data
                         password: passwordLogin  // Replace with actual data
-                    })
+                    }),
+                    credentials: 'include'
                 });
-
                 if (response.ok) {
-                    console.log(response);
                         const data = await response.json();
+                        
                         const accessToken = await response.headers.get('Authorization');
                         if (accessToken) {
                         // You now have the access token, and you can store it or use it as needed
@@ -573,13 +573,12 @@ body:not(.light-theme) .hover-bg {
                         registerText.style.display = "none";
                         logoutText.style.display = "block";
                         
-
                         
 
                         await fetch(apiUrlGet, {
                                 method: 'GET',
                                 headers: {
-                                    'Authorization': `Bearer ${accessToken}`,
+                                    'Authorization': `${accessToken}`,
                                     'Content-Type': 'application/json'
                                     // Add any other headers as needed
                                 },
@@ -745,7 +744,7 @@ body:not(.light-theme) .hover-bg {
 <div class="flex h-screen pt-16"> <!-- h-screen to set total height to be 100vh -->
 
     <!-- Left Sidebar -->
-    <aside class="w-[230px] bg-[rgba(18,19,22,0.95)] fixed top-4 left-0 ml-4 rounded-2xl shadow-2xl" style="height: calc(100vh - 2rem); bottom: 2rem;">
+    <aside class="w-[230px] bg-[rgba(18,19,22,0.95)] fixed top-4 left-0 ml-4 rounded-2xl shadow-2xl" style="height: calc(100vh - 2rem); bottom: 2rem; border: 1px solid white;">
         <!-- <div class="pt-10 space-y-2">
             <a href="#" class="flex justify-center items-center py-2 px-4 text-white text-sm hover:bg-gray-700 rounded">Dashboard</a>
             <a href="#" class="flex justify-center items-center py-2 px-4 text-white text-sm hover:bg-gray-700 rounded">Settings</a>
@@ -769,7 +768,7 @@ body:not(.light-theme) .hover-bg {
     </aside>
 
     <!-- Right Sidebar -->
-    <aside class="w-[230px] bg-[rgba(18,19,22,0.95)] fixed top-4 right-0 mr-4 rounded-2xl shadow-2xl" style="height: calc(100vh - 2rem); bottom: 2rem; display: flex; flex-direction: column; align-items: center;">
+    <aside class="w-[230px] bg-[rgba(18,19,22,0.95)] fixed top-4 right-0 mr-4 rounded-2xl shadow-2xl" style="height: calc(100vh - 2rem); bottom: 2rem; display: flex; flex-direction: column; align-items: center;border: 1px solid white;">
         <div class="pt-10 space-y-2 w-full text-center">
             <a href="#" class="block py-2 px-4 text-white text-sm hover:bg-gray-700 rounded">Help</a>
             <a href="#" class="block py-2 px-4 text-white text-sm hover:bg-gray-700 rounded">Support</a>
