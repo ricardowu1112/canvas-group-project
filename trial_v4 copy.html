@@ -524,9 +524,9 @@ body:not(.light-theme) .hover-bg {
                 <!-- <button data-modal-target="authentication-modal" data-modal-toggle="authentication-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"> -->
                     <!-- Toggle modal -->
                   <!-- </button> -->
+                <a class="text-white text-sm prevent-select login-button" id="logout-text" data-modal-target="authentication-modal" data-modal-toggle="authentication-modal" type="button" style="padding: 5px; display: none;">Logout</a>
                   
-                  
-                <a id="register-text" class="text-white text-sm prevent-select login-button" style="padding: 5px;" data-modal-target="register-modal" data-modal-toggle="register-modal" type="button">Register</a>
+                <a id="register-text" onclick="logOut()" class="text-white text-sm prevent-select login-button" style="padding: 5px;" data-modal-target="register-modal" data-modal-toggle="register-modal" type="button">Register</a>
             </div>
         </div>
     </nav>
@@ -534,75 +534,130 @@ body:not(.light-theme) .hover-bg {
 </div>
 <!-- Main modal -->
 <script>
-async function handleLoginClick() {
-        const apiUrl = 'http://127.0.0.1:5000/customer/login'; // Replace with your API URL 52.184.80.174
-        const usernameLogin = document.getElementById('username-login').value;
-        const passwordLogin = document.getElementById('password-login').value;
         const loginText = document.getElementById('login-text');
+        const logoutText = document.getElementById('logout-text');
         const registerText = document.getElementById('register-text');
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                    // Include other headers as required
-                },
-                body: JSON.stringify({
-                    username: usernameLogin, // Replace with actual data
-                    password: passwordLogin  // Replace with actual data
-                })
-            });
+        async function handleLoginClick() {
+            const apiUrl = 'http://127.0.0.1:5000/customer/login'; // Replace with your API URL 52.184.80.174
+            const apiUrlGet = 'http://127.0.0.1:5000/customer/auth/drawings'; // Replace with your API URL 52.184.80.174
+            const usernameLogin = document.getElementById('username-login').value;
+            const passwordLogin = document.getElementById('password-login').value;
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // Include other headers as required
+                    },
+                    body: JSON.stringify({
+                        username: usernameLogin, // Replace with actual data
+                        password: passwordLogin  // Replace with actual data
+                    })
+                });
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Login successful', data);
-                var modal = document.getElementById('authentication-modal');
-                modal.classList.add('hidden');
-                loginText.innerHTML = "Logout";
-                registerText.style.display = "none";
-            } else {
-                console.log('Login failed');
-                // Handle errors or unsuccessful login here
+                if (response.ok) {
+                    console.log(response);
+                        const data = await response.json();
+                        const accessToken = await response.headers.get('Authorization');
+                        if (accessToken) {
+                        // You now have the access token, and you can store it or use it as needed
+                        console.log('Access Token:', accessToken);
+                        } else {
+                        console.error('No access token found in the response headers.');
+                        }
+
+                        console.log('Login successful', data);
+                        var modal = document.getElementById('authentication-modal');
+                        modal.classList.add('hidden');
+                        loginText.style.display = "none";
+                        registerText.style.display = "none";
+                        logoutText.style.display = "block";
+                        
+
+                        
+
+                        await fetch(apiUrlGet, {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': `Bearer ${accessToken}`,
+                                    'Content-Type': 'application/json'
+                                    // Add any other headers as needed
+                                },
+                                })
+                                .then((response) => {
+                                    if (response.ok) {
+                                    // Handle the successful response
+                                    return response.json(); // Or parse the response as needed
+                                    } else {
+                                    // Handle error responses
+                                    console.error('Error:', response.status, response.statusText);
+                                    }
+                                })
+                                .then((data) => {
+                                    // Handle the response data here
+                                    console.log('Response Data:', data);
+                                })
+                                .catch((error) => {
+                                    console.error('Fetch error:', error);
+                                });
+                        
+                } else {
+                    console.log('Login failed');
+                    // Handle errors or unsuccessful login here
+                }
+            } catch (error) {
+                console.error('Error during API call', error);
             }
-        } catch (error) {
-            console.error('Error during API call', error);
         }
-    }
 
-async function handleRegisterClick() {
-        const apiUrl = 'http://127.0.0.1:5000/register'; // Replace with your API URL 52.184.80.174
-        const usernameRegister = document.getElementById('username-register').value;
-        const passwordRegister = document.getElementById('password-register').value;
-        const loginText = document.getElementById('login-text');
-        const registerText = document.getElementById('register-text');
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                    // Include other headers as required
-                },
-                body: JSON.stringify({
-                    username: usernameRegister, // Replace with actual data
-                    password: passwordRegister  // Replace with actual data
-                })
-            });
+        async function handleRegisterClick() {
+            const apiUrl = 'http://127.0.0.1:5000/register'; // Replace with your API URL 52.184.80.174
+            
+            const usernameRegister = document.getElementById('username-register').value;
+            const passwordRegister = document.getElementById('password-register').value;
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Signup successful', data);
-                var modal = document.getElementById('register-modal');
-                modal.classList.add('hidden');
-                loginText.innerHTML = "Logout";
-                registerText.style.display = "none";
-            } else {
-                console.log('Register failed');
-                // Handle errors or unsuccessful login here
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // Include other headers as required
+                    },
+                    body: JSON.stringify({
+                        username: usernameRegister, // Replace with actual data
+                        password: passwordRegister  // Replace with actual data
+                    })
+                });
+
+                if (response.ok) {
+                        const data = await response.json();
+                        console.log('Signup successful', data);
+                        var modal = document.getElementById('register-modal');
+                        modal.classList.add('hidden');
+                        loginText.style.display = "none";
+                        logoutText.style.display = "block";
+                        registerText.style.display = "none";
+                        
+
+
+                } else {
+                    console.log('Register failed');
+                    // Handle errors or unsuccessful login here
+                }
+            } catch (error) {
+                console.error('Error during API call', error);
             }
-        } catch (error) {
-            console.error('Error during API call', error);
         }
-    }
+
+        function logOut(){
+
+            loginText.style.display = "block";
+            logoutText.style.display = "none";
+            registerText.style.display = "block";
+            localStorage.clear();
+        }
+            
+
 </script>
                   <div id="authentication-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                       <div class="relative p-4 w-full max-w-md max-h-full">
@@ -788,7 +843,7 @@ async function handleRegisterClick() {
     });
 });
   </script>
-
+<script src="json2.js"></script>
 <script>
     function copyObjectHandler() {
         $('#context-menu').hide();
@@ -1102,8 +1157,15 @@ document.getElementById('move-down').addEventListener('click', function() {
 
     let isGrouped;
 // Initialization and setup
-var canvasHistory = [];
-var currentIndex = -1;
+
+// try {
+//   var jsonData = JSON.parse(localStorage.getItem('historyArray')); // Replace with your actual JSON data
+//   // Use jsonData as needed
+// } catch (error) {
+//   console.error("Error parsing JSON:", error);
+// }
+// var currentIndex = -1;
+
 var isUndoRedoOperation = false;
 var historySizeLimit = 20; // Set the maximum size of the history
 var drawingModeEl = document.getElementById('drawing-mode');
@@ -1351,10 +1413,45 @@ drawingModeEl.onclick = function() { toggleDrawingMode('free'); };
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+var canvasHistory = [];
+        
+        
+var currentIndex = -1;
+        
+        
+function init(){
+                canvasHistory =  localStorage.getItem('historyArray')? JSON.parse(localStorage.getItem('historyArray')) : [];
+                currentIndex = localStorage.getItem('currentIndex')? JSON.parse(localStorage.getItem('currentIndex')) : -1;
+                canvas.loadFromJSON(canvasHistory[currentIndex], function() {
+                    canvas.renderAll();
+                });
+                const currentCanvasState = JSON.stringify(canvas.toJSON());
 
+                console.log(currentIndex);
+                console.log(JSON.parse(localStorage.getItem('historyArray')));
+                // Check if the current state is different from the last saved state
+                const lastSavedState = canvasHistory[currentIndex];
+                if (currentCanvasState !== lastSavedState) {
+                    // Remove any future states if they exist
+                    canvasHistory = canvasHistory.slice(0, currentIndex + 1);
+                    currentIndex++;
+                    canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
+                    localStorage.setItem('historyArray', JSON.stringify(canvasHistory));
+                    localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
+                    // Drop the oldest states until the history size is within the limit
+                    while (canvasHistory.length > historySizeLimit) {
+                        canvasHistory.shift();
+                        currentIndex--;
+                        if (currentIndex < 0) {
+                            currentIndex = 0; // Ensures currentIndex doesn't go below 0
+                        }
+                    }
+                }
+}
 
 // Function to save the current canvas state to history
 function saveToHistory() {
+
             if (!isUndoRedoOperation) {
                 const currentCanvasState = JSON.stringify(canvas.toJSON());
                 // Check if the current state is different from the last saved state
@@ -1364,6 +1461,8 @@ function saveToHistory() {
                     canvasHistory = canvasHistory.slice(0, currentIndex + 1);
                     currentIndex++;
                     canvasHistory[currentIndex] = JSON.stringify(canvas.toJSON());
+                    localStorage.setItem('historyArray', JSON.stringify(canvasHistory));
+                    localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
                     // Drop the oldest states until the history size is within the limit
                     while (canvasHistory.length > historySizeLimit) {
                         canvasHistory.shift();
@@ -1449,7 +1548,11 @@ function saveToHistory() {
 
 
         // Save initial state
-        saveToHistory();
+
+        init()
+
+        console.log(canvasHistory[currentIndex])
+
         updatePasteButtonVisibility();
 
 
@@ -1668,27 +1771,27 @@ document.querySelectorAll('.nav-link').forEach(link => {
 
 
 
-var dataPoints = [
-    { x: 10, y: 50 }, 
-    { x: 50, y: 30 },
-    { x: 90, y: 70 },
-    // Add more points as needed
-];
+// var dataPoints = [
+//     { x: 10, y: 50 }, 
+//     { x: 50, y: 30 },
+//     { x: 90, y: 70 },
+//     // Add more points as needed
+// ];
 
-// Function to draw a line between two points
-function drawLine(point1, point2) {
-    var line = new fabric.Line([point1.x, point1.y, point2.x, point2.y], {
-        fill: 'black',
-        stroke: 'black',
-        strokeWidth: 2,
-    });
-    canvas.add(line);
-}
+// // Function to draw a line between two points
+// function drawLine(point1, point2) {
+//     var line = new fabric.Line([point1.x, point1.y, point2.x, point2.y], {
+//         fill: 'black',
+//         stroke: 'black',
+//         strokeWidth: 2,
+//     });
+//     canvas.add(line);
+// }
 
-// Draw the line plot
-for (var i = 0; i < dataPoints.length - 1; i++) {
-    drawLine(dataPoints[i], dataPoints[i + 1]);
-}
+// // Draw the line plot
+// for (var i = 0; i < dataPoints.length - 1; i++) {
+//     drawLine(dataPoints[i], dataPoints[i + 1]);
+// }
 </script>
 
 </body>
